@@ -11,11 +11,11 @@ const road=new Road(carCanvas.width/2,carCanvas.width*0.9);
 const N=500;
 const cars=generateCars(N);
 let bestCar=cars[0];
-if(localStorage.getItem("bestBrain1")){
+if(localStorage.getItem("bestBrain")){
     for(let i=0;i<cars.length;i++){
-        cars[i].brain.layers=JSON.parse(localStorage.getItem("bestBrain"));
+        cars[i].brain =  NeuralNet.fromWeights(JSON.parse(localStorage.getItem("bestBrain")));
         if(i!=0){
-            NeuralNetwork.mutate(cars[i].brain,0.1);
+            // cars[i].brain.mutate(0.1);
         }
     }
 }
@@ -35,7 +35,7 @@ animate();
 
 function save(){
     localStorage.setItem("bestBrain",
-        JSON.stringify(bestCar.brain.layers));
+        JSON.stringify(bestCar.brain.getWeights()));
 }
 
 function discard(){
