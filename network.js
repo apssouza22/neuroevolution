@@ -1,5 +1,7 @@
 class NeuralNetwork {
+
     constructor(neuronCounts) {
+        this.model = new NeuralNet(neuronCounts);
         this.layers = [];
         for (let i = 0; i < neuronCounts.length - 1; i++) {
             this.layers.push(new Layer(neuronCounts[i], neuronCounts[i + 1]));
@@ -7,11 +9,12 @@ class NeuralNetwork {
     }
 
     static feedForward(givenInputs, network) {
-        let outputs = Layer.feedForward(givenInputs, network.layers[0]);
-        for (let i = 1; i < network.layers.length; i++) {
-            outputs = Layer.feedForward(outputs, network.layers[i]);
-        }
+        network.layers = network.model.layers
+
+        let outputs = network.model.feedforward(givenInputs, false);
+        outputs = outputs.map(i=> i > 0.5 ? 1:0)
         return outputs;
+
     }
 
     static mutate(network, amount = 1) {
@@ -64,9 +67,9 @@ class Layer {
 
     static feedForward(givenInputs, layer) {
         // each neurons
-        for (let i = 0; i < layer.inputs.length; i++) {
-            layer.inputs[i] = givenInputs[i];
-        }
+        // for (let i = 0; i < layer.inputs.length; i++) {
+        // }
+            layer.inputs = givenInputs;
 
 
         for (let i = 0; i < layer.outputs.length; i++) {
