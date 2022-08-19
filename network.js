@@ -3,18 +3,17 @@
  */
 class NeuralNetwork {
     /**
-     * @param  {Array} arg_array - array of counts of neurons in each layer
+     * @param  {Array} layerNodesCounts - array of counts of neurons in each layer
      * Eg : new NeuralNet([3,4,2]); will instantiate ANN with 3 neurons as input layer, 4 as hidden and 2 as output layer
      */
     constructor(arg_array) {
-        this.layer_nodes_counts = arg_array; // no of neurons per layer
-        this.layers_count = arg_array.length; //total number of layers
+        this.layerNodesCounts = arg_array; // no of neurons per layer
 
         this.layers = []
-        const {layer_nodes_counts} = this;
+        const {layerNodesCounts} = this;
 
-        for (let i = 0; i < layer_nodes_counts.length - 1; i++) {
-            this.layers.push(new MyLayer(layer_nodes_counts[i], layer_nodes_counts[i + 1], NeuralNetwork.sigmoid))
+        for (let i = 0; i < layerNodesCounts.length - 1; i++) {
+            this.layers.push(new Layer(layerNodesCounts[i], layerNodesCounts[i + 1], NeuralNetwork.sigmoid))
         }
         NeuralNetwork.SIGMOID = 1;
         NeuralNetwork.ReLU = 2;
@@ -30,7 +29,7 @@ class NeuralNetwork {
         const nn = new NeuralNetwork(model.layer_nodes_counts)
         let layers = []
         for (let i = 0; i < model.layer_nodes_counts.length - 1; i++) {
-            layers.push(MyLayer.fromWeights(
+            layers.push(Layer.fromWeights(
                     model.layers[i],
                     model.layer_nodes_counts[i],
                     model.layer_nodes_counts[i + 1]
@@ -46,7 +45,7 @@ class NeuralNetwork {
             layers.push(this.layers[layersKey].getWeights())
         }
         return {
-            layer_nodes_counts: this.layer_nodes_counts,
+            layerNodesCounts: this.layerNodesCounts,
             layers: layers,
         }
     }
@@ -58,14 +57,14 @@ class NeuralNetwork {
      * @returns {Array} - the Neural net output for each layer
      */
     feedForward(input_array, GET_ALL_LAYERS) {
-        if (!this._feedforward_args_validator(input_array)) {
+        if (!this.#feedforwardArgsValidator(input_array)) {
             return -1;
         }
         let inputMat = Matrix.fromArray(input_array)
         let outputs = [];
         outputs[0] = inputMat
-        for (let i = 1; i < this.layer_nodes_counts.length; i++) {
-            outputs[i]=this.layers[i - 1].feedForward(inputMat);
+        for (let i = 1; i < this.layerNodesCounts.length; i++) {
+            outputs[i] = this.layers[i - 1].feedForward(inputMat);
             inputMat = outputs[i];
         }
 
@@ -75,22 +74,13 @@ class NeuralNetwork {
         return outputs[outputs.length - 1].toArray();
     }
 
-
-    /**
-     * Mutates weights and biases of ANN based on rate given
-     * @param {float} rate - rate from 0-1
-     */
-    mutate(rate) { //rate 0 to 1
-        NeuralNetMutator.mutate(this, rate)
-    }
-
     /**
      * @param {Array} input_array - Array of input values
      * @param {Array} target_array - Array of labels
      */
     // Trains with backpropogation
     train(input_array, target_array) {
-        if (!this._train_args_validator(input_array, target_array)) {
+        if (!this.#trainArgsValidator(input_array, target_array)) {
             return -1;
         }
 
@@ -98,7 +88,7 @@ class NeuralNetwork {
         let target_matrix = Matrix.fromArray(target_array);
 
         let prev_error;
-        this.loopLayersInReverse(this.layer_nodes_counts, (layer_index) => {
+        this.loopLayersInReverse(this.layerNodesCounts, (layer_index) => {
             /* right and left are in respect to the current layer */
             let layerOutput = layerOutputs[layer_index];
             let layer_error = this.calculateLayerErrorLoss(layer_index, layerOutputs, target_matrix, layerOutput, prev_error);
@@ -196,22 +186,22 @@ class NeuralNetwork {
     }
 
     // Argument validator functions
-    _feedforward_args_validator(input_array) {
+    #feedforwardArgsValidator(input_array) {
         let invalid = false;
-        if (input_array.length != this.layer_nodes_counts[0]) {
+        if (input_array.length != this.layerNodesCounts[0]) {
             invalid = true;
             console.error("Feedforward failed : Input array and input layer size doesn't match.");
         }
         return invalid ? false : true;
     }
 
-    _train_args_validator(input_array, target_array) {
+    #trainArgsValidator(input_array, target_array) {
         let invalid = false;
-        if (input_array.length != this.layer_nodes_counts[0]) {
+        if (input_array.length != this.layerNodesCounts[0]) {
             console.error("Training failed : Input array and input layer size doesn't match.");
             invalid = true;
         }
-        if (target_array.length != this.layer_nodes_counts[this.layers_count - 1]) {
+        if (target_array.length != this.layerNodesCounts[this.layerNodesCounts.length - 1]) {
             invalid = true;
             console.error("Training failed : Target array and output layer size doesn't match.");
         }
@@ -220,7 +210,7 @@ class NeuralNetwork {
 
 }
 
-class MyLayer {
+class Layer {
 
     constructor(inputSize, outputSize, activation) {
         let weights_mat = new Matrix(outputSize, inputSize);
@@ -237,7 +227,7 @@ class MyLayer {
     }
 
     static fromWeights(trainedLayer, inputSize, outputSize) {
-        let layer = new MyLayer(inputSize, outputSize, NeuralNetwork.sigmoid);
+        let layer = new Layer(inputSize, outputSize, NeuralNetwork.sigmoid);
         layer.weights.data = trainedLayer.weights
         layer.biases.data = trainedLayer.biases;
         layer.inputs = trainedLayer.inputs;
@@ -259,7 +249,7 @@ class MyLayer {
      * @param {Array} input_array - Array of input values
      * @param {Boolean} GET_ALL_LAYERS - if we need all layers after feed forward instead of just output layer
      */
-    feedForward(input, GET_ALL_LAYERS) {
+    feedForward(input) {
         this.inputs = input.data
         input = Matrix.multiply(this.weights, input);
         input.add(this.biases);
