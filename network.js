@@ -53,26 +53,26 @@ class NeuralNetwork {
 
     /**
      * Perform the feed foward operation
-     * This will output the Neural net prediction for each layer
      * @param {Array} input_array - Array of input values
      * @param {Boolean} GET_ALL_LAYERS - if we need all layers after feed forward instead of just output layer
+     * @returns {Array} - the Neural net output for each layer
      */
     feedForward(input_array, GET_ALL_LAYERS) {
         if (!this._feedforward_args_validator(input_array)) {
             return -1;
         }
         let inputMat = Matrix.fromArray(input_array)
-        let outputs = []; //This will be array of layer outputs
-
+        let outputs = [];
+        outputs[0] = inputMat
         for (let i = 1; i < this.layer_nodes_counts.length; i++) {
-            outputs.push(this.layers[i - 1].feedForward(inputMat));
-            inputMat = outputs[i - 1];
+            outputs[i]=this.layers[i - 1].feedForward(inputMat);
+            inputMat = outputs[i];
         }
 
         if (GET_ALL_LAYERS == true) {
-            return outputs; //all layers (array of layer matrices)
+            return outputs;
         }
-        return outputs[outputs.length - 1].toArray(); //output layer array
+        return outputs[outputs.length - 1].toArray();
     }
 
 
@@ -98,7 +98,7 @@ class NeuralNetwork {
         let target_matrix = Matrix.fromArray(target_array);
 
         let prev_error;
-        this.loopLayersInReverse(layerOutputs, (layer_index) => {
+        this.loopLayersInReverse(this.layer_nodes_counts, (layer_index) => {
             /* right and left are in respect to the current layer */
             let layerOutput = layerOutputs[layer_index];
             let layer_error = this.calculateLayerErrorLoss(layer_index, layerOutputs, target_matrix, layerOutput, prev_error);
