@@ -13,7 +13,7 @@ const cars=generateCars(N);
 let bestCar=cars[0];
 if(localStorage.getItem("bestBrain")){
     for(let i=0;i<cars.length;i++){
-        cars[i].brain =  NeuralNet.fromWeights(JSON.parse(localStorage.getItem("bestBrain")));
+        cars[i].brain =  NeuralNetwork.fromWeights(JSON.parse(localStorage.getItem("bestBrain")));
         if(i!=0){
             cars[i].brain.mutate(0.1);
         }
