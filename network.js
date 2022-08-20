@@ -2,13 +2,14 @@
  * A mini library for Artificial Neural Network inspired by ToyNeuralNetwork - https://github.com/CodingTrain/Toy-Neural-Network-JS
  */
 class NeuralNetwork {
+    static SIGMOID = 1;
+    static ReLU = 2;
+
     /**
      * @param  {Array} layerNodesCounts - array of counts of neurons in each layer
-     * Eg : new NeuralNet([3,4,2]); will instantiate ANN with 3 neurons as input layer, 4 as hidden and 2 as output layer
+     * Eg : new NeuralNet([3,4,2]); will instantiate NN with 3 neurons as input layer, 4 as hidden and 2 as output layer
      */
     constructor(layerNodesCounts) {
-        NeuralNetwork.SIGMOID = 1;
-        NeuralNetwork.ReLU = 2;
         this.layerNodesCounts = layerNodesCounts; // no of neurons per layer
         this.learningRate = 0.2;
         this.setActivation(NeuralNetwork.SIGMOID);
@@ -71,7 +72,7 @@ class NeuralNetwork {
      */
     feedForward(input_array, GET_ALL_LAYERS) {
         if (!this.#feedforwardArgsValidator(input_array)) {
-            return -1;
+            throw new Error("Invalid arguments");
         }
         let inputMat = Matrix.fromArray(input_array)
         let outputs = [];
@@ -93,38 +94,29 @@ class NeuralNetwork {
      */
     train(input, target) {
         if (!this.#trainArgsValidator(input, target)) {
-            return -1;
+            throw new Error("Invalid arguments");
         }
 
         this.feedForward(input, true); //layer matrices
         let targetMatrix = Matrix.fromArray(target);
 
-        let prevError = 0;
-        this.calculateLoss(targetMatrix, prevError);
+        this.calculateLoss(targetMatrix);
+        this.updateWeights()
     }
 
     calculateLoss(targetMatrix) {
         this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            let layerError = this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex -1].layerError);
-            this.backPropagation(layerIndex, layerError);
+            this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex -1].layerError);
         })
     }
 
-    updateWeights(targetMatrix, prevError) {
+    updateWeights() {
         this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            this.backPropagation(layerIndex, layerError);
+            const currentLayer = this.layers[layerIndex]
+            const nextLayer = this.layers[layerIndex - 1]
+            currentLayer.calculateGradient(this.activation_derivative, this.learningRate);
+            currentLayer.updateWeights(nextLayer.outputs);
         })
-    }
-
-    backPropagation(layerIndex, layerError) {
-        const currentLayer = this.layers[layerIndex]
-        const nextLayer = this.layers[layerIndex - 1]
-
-        //Calculating layer gradient
-        const currentLayerGradient = Matrix.map(currentLayer.outputs, this.activation_derivative);
-        currentLayerGradient.multiply(layerError);
-        currentLayerGradient.multiply(this.learningRate);
-        currentLayer.updateWeights(nextLayer.outputs, currentLayerGradient);
     }
 
     loopLayersInReverse(layerOutputs, callback) {
@@ -206,6 +198,8 @@ class Layer {
     static INPUT = 1
     static HIDDEN = 2
     static OUTPUT = 3
+    layerError = null
+    gradient = null
 
     constructor(inputSize, outputSize, activation, layerType) {
         this.layerType = layerType;
@@ -272,21 +266,29 @@ class Layer {
 
     calculateErrorLoss(target_matrix, prev_error) {
         if (this.layerType == Layer.OUTPUT) {
-            return Matrix.add(target_matrix, Matrix.multiply(this.outputs, -1));
+            this.layerError = Matrix.add(target_matrix, Matrix.multiply(this.outputs, -1));
+            return this.layerError;
         }
         const weightTranspose = Matrix.transpose(this.weights);
         this.layerError =  Matrix.multiply(weightTranspose, prev_error);
         return this.layerError;
     }
 
-    updateWeights(nextLayerOutput, currentLayerGradient) {
+    updateWeights(nextLayerOutput) {
         //Calculating delta weights
         const nextLayerOutputTransposed = Matrix.transpose(nextLayerOutput);
-        const nextWeightsDelta = Matrix.multiply(currentLayerGradient, nextLayerOutputTransposed);
+        const nextWeightsDelta = Matrix.multiply(this.gradient, nextLayerOutputTransposed);
 
         //Updating weights and biases
         this.weights.add(nextWeightsDelta);
-        this.biases.add(currentLayerGradient);
+        this.biases.add(this.gradient);
+    }
+
+
+    calculateGradient(activation_derivative, learningRate) {
+        this.gradient = Matrix.map(this.outputs, activation_derivative);
+        this.gradient.multiply(this.layerError);
+        this.gradient.multiply(learningRate);
     }
 
 }
