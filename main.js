@@ -5,10 +5,9 @@ networkCanvas.width = 300;
 
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
+const N = 500;
 
 const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9);
-
-const N = 500;
 const cars = generateCars(N);
 let bestCar = cars[0];
 let bestCars = cars
@@ -20,9 +19,9 @@ if (localStorage.getItem("bestBrain")) {
     mom.brain.loadWeights(JSON.parse(localStorage.getItem("bestBrain")));
     dad.brain.loadWeights(JSON.parse(localStorage.getItem("bestBrain2")));
     for (let i = 0; i < cars.length; i++) {
-        if (i > 0) {
-            // cars[i].brain = mom.brain.crossover(dad.brain);
-            cars[i].brain.mutate(1);
+        if (i > 1) {
+            cars[i].brain = mom.brain.crossover(dad.brain);
+            cars[i].brain.mutate(0.1);
         }
     }
 }
@@ -52,6 +51,7 @@ function save() {
 
 function discard() {
     localStorage.removeItem("bestBrain");
+    localStorage.removeItem("bestBrain2");
 }
 
 function generateCars(N) {
@@ -62,7 +62,15 @@ function generateCars(N) {
     return cars;
 }
 
-function animate(time) {
+setTimeout(() => {
+    console.log("Restarting simulation");
+    if (passFirstTrafficCar) {
+        save()
+    }
+    location.reload();
+}, 60000);
+
+function playStep(time = 21792.403) {
     for (let i = 0; i < traffic.length; i++) {
         traffic[i].update(road.borders, []);
     }
@@ -92,11 +100,16 @@ function animate(time) {
         passFirstTrafficCar = true
     }
     if (passFirstTrafficCar && traffic[0].y < bestCar.y) {
+        save()
         location.reload();
     }
     carCtx.restore();
 
     networkCtx.lineDashOffset = -time / 50;
     Visualizer.drawNetwork(networkCtx, bestCar.brain);
+}
+
+function animate(time) {
+    playStep(time);
     requestAnimationFrame(animate);
 }

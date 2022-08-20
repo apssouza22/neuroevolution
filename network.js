@@ -139,6 +139,18 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         this.#updateWeights()
     }
 
+    /**
+     * Trains with back propogation
+     * @param {Array} input - Array of input values
+     **/
+    predict(input) {
+        return this.feedForward(input, false);
+    }
+
+    save(key = "rl-brain") {
+        localStorage.setItem(key, JSON.stringify(this.getWeights()));
+    }
+
     #calculateLoss(targetMatrix) {
         this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
             this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex - 1].layerError);

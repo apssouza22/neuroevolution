@@ -39,15 +39,15 @@ class NeuralNetworkMutable extends NeuralNetwork {
         const offspring = new NeuralNetworkMutable(neuralNetwork.layerNodesCounts);
         for (let i = 0; i < neuralNetwork.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.layers[i].weights = neuralNetwork.layers[i].weights;
+                offspring.layers[i].weights = neuralNetwork.layers[i].weights.copy();
             } else {
-                offspring.layers[i].weights = this.layers[i].weights;
+                offspring.layers[i].weights = this.layers[i].weights.copy();
             }
 
             if (Math.random() < 0.5) {
-                offspring.layers[i].biases = neuralNetwork.layers[i].biases;
+                offspring.layers[i].biases = neuralNetwork.layers[i].biases.copy();
             } else {
-                offspring.layers[i].biases = this.layers[i].biases;
+                offspring.layers[i].biases = this.layers[i].biases.copy();
             }
         }
         return offspring;
