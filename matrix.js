@@ -78,10 +78,10 @@ class Matrix {
             return imat;
         }
         if (!(matx1.cols == matx2.rows)) {
-            console.error('size mismatch!');
+            throw new Error('size mismatch!');
         }
         if (!(matx1 instanceof Matrix && matx2 instanceof Matrix)) {
-            console.error('argument to matrix multiplication func should be only Matrix objects');
+            throw new Error('argument to matrix multiplication func should be only Matrix objects');
         }
         console.error("Matrix multiplication failed!");
         return -1; //product not possible
