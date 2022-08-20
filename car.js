@@ -60,6 +60,13 @@ class Car {
         }
     }
 
+    /**
+     * Calculates how good the car performed on the road
+     */
+    calcFitness() {
+        return 10000 - this.y;
+    }
+
     #assessDamage(roadBorders, traffic) {
         for (let i = 0; i < roadBorders.length; i++) {
             if (polysIntersect(this.polygon, roadBorders[i])) {

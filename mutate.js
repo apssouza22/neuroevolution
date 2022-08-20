@@ -20,7 +20,7 @@ class NeuralNetworkMutable extends NeuralNetwork {
         }
 
         for (let i = 0; i < this.layers.length; i++) {
-            if (this.layers[i].type == Layer.INPUT) {
+            if (this.layers[i].layerType == Layer.INPUT) {
                 continue;
             }
             this.layers[i].weights.map(mutator);
@@ -36,18 +36,18 @@ class NeuralNetworkMutable extends NeuralNetwork {
         if (!this.#crossoverValidator(neuralNetwork)) {
             return -1;
         }
-        const offspring = new NeuralNetwork(neuralNetwork.layerNodesCounts);
-        for (let i = 0; i < neuralNetwork.layers[i].weights.length; i++) {
+        const offspring = new NeuralNetworkMutable(neuralNetwork.layerNodesCounts);
+        for (let i = 0; i < neuralNetwork.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.layers[i].weights = neuralNetwork.layers[i].weights[i];
+                offspring.layers[i].weights = neuralNetwork.layers[i].weights;
             } else {
-                offspring.layers[i].weights[i] = this.layers[i].weights[i];
+                offspring.layers[i].weights = this.layers[i].weights;
             }
 
             if (Math.random() < 0.5) {
-                offspring.layers[i].biases[i] = neuralNetwork.layers[i].biases[i];
+                offspring.layers[i].biases = neuralNetwork.layers[i].biases;
             } else {
-                offspring.layers[i].biases[i] = this.layers[i].biases[i];
+                offspring.layers[i].biases = this.layers[i].biases;
             }
         }
         return offspring;

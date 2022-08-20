@@ -114,6 +114,9 @@ class NeuralNetwork {
     }
 }
 
+/**
+ * Neural Network that implements backpropagation algorithm
+ */
 class TrainableNeuralNetwork extends NeuralNetwork {
     learningRate;
 
@@ -132,20 +135,18 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         }
 
         this.feedForward(input, true); //layer matrices
-        let targetMatrix = Matrix.fromArray(target);
-
-        this.calculateLoss(targetMatrix);
-        this.updateWeights()
+        this.#calculateLoss(Matrix.fromArray(target));
+        this.#updateWeights()
     }
 
-    calculateLoss(targetMatrix) {
-        this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
+    #calculateLoss(targetMatrix) {
+        this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
             this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex - 1].layerError);
         })
     }
 
-    updateWeights() {
-        this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
+    #updateWeights() {
+        this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
             const currentLayer = this.layers[layerIndex]
             const nextLayer = this.layers[layerIndex - 1]
             currentLayer.calculateGradient(this.activation_derivative, this.learningRate);
@@ -153,7 +154,7 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         })
     }
 
-    loopLayersInReverse(layerOutputs, callback) {
+    #loopLayersInReverse(layerOutputs, callback) {
         for (let layer_index = layerOutputs.length - 1; layer_index >= 1; layer_index--) {
             callback(layer_index)
         }
