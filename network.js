@@ -99,10 +99,19 @@ class NeuralNetwork {
         this.feedForward(input, true); //layer matrices
         let targetMatrix = Matrix.fromArray(target);
 
-        let prevError;
+        let prevError = 0;
+        this.calculateLoss(targetMatrix, prevError);
+    }
+
+    calculateLoss(targetMatrix) {
         this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            let layerError = this.layers[layerIndex].calculateErrorLoss(targetMatrix, prevError);
-            prevError = layerError.copy(); //will be used for error calculation in hidden layers
+            let layerError = this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex -1].layerError);
+            this.backPropagation(layerIndex, layerError);
+        })
+    }
+
+    updateWeights(targetMatrix, prevError) {
+        this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
             this.backPropagation(layerIndex, layerError);
         })
     }
@@ -266,7 +275,8 @@ class Layer {
             return Matrix.add(target_matrix, Matrix.multiply(this.outputs, -1));
         }
         const weightTranspose = Matrix.transpose(this.weights);
-        return Matrix.multiply(weightTranspose, prev_error);
+        this.layerError =  Matrix.multiply(weightTranspose, prev_error);
+        return this.layerError;
     }
 
     updateWeights(nextLayerOutput, currentLayerGradient) {
