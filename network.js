@@ -1,56 +1,27 @@
 /**
- * A mini library for Artificial Neural Network inspired by ToyNeuralNetwork - https://github.com/CodingTrain/Toy-Neural-Network-JS
+ * Artificial Neural Network
  */
 class NeuralNetwork {
-    static SIGMOID = 1;
-    static ReLU = 2;
 
     /**
      * @param  {Array} layerNodesCounts - array of counts of neurons in each layer
      * Eg : new NeuralNet([3,4,2]); will instantiate NN with 3 neurons as input layer, 4 as hidden and 2 as output layer
      */
-    constructor(layerNodesCounts) {
+    constructor(layerNodesCounts,activation = Activation.SIGMOID) {
         this.layerNodesCounts = layerNodesCounts; // no of neurons per layer
-        this.learningRate = 0.2;
-        this.setActivation(NeuralNetwork.SIGMOID);
-        this.createLayers(layerNodesCounts);
-    }
-
-
-    createLayers(layerNodesCounts) {
-        this.layers = []
-        this.layers.push(new Layer(
-                layerNodesCounts[0],
-                layerNodesCounts[0],
-                this.activation,
-                Layer.INPUT
-        ))
-
-        for (let i = 0; i < layerNodesCounts.length - 1; i++) {
-            let layerType = Layer.HIDDEN;
-            if (i == layerNodesCounts.length - 2) {
-                layerType = Layer.OUTPUT;
-            }
-            this.layers.push(new Layer(
-                    layerNodesCounts[i],
-                    layerNodesCounts[i + 1],
-                    this.activation,
-                    layerType
-            ))
-        }
+        this.#setActivation(activation);
+        this.#createLayers(layerNodesCounts);
     }
 
     /**
-     * Creates a new NeuralNetwork from a JSON object
-     * @param {NeuralNetwork} model
+     * Load the pre trained weights from a JSON object
+     * @param {NeuralNetwork} dict
      * @returns {NeuralNetwork}
      */
-    static fromWeights(model) {
-        const nn = new NeuralNetwork(model.layerNodesCounts)
-        for (const i in nn.layers) {
-            nn.layers[i] = Layer.fromWeights(model.layers[i])
+    loadWeights(dict) {
+        for (const i in this.layers) {
+            this.layers[i].loadWeights(dict.layers[i])
         }
-        return nn
     }
 
     getWeights() {
@@ -87,6 +58,69 @@ class NeuralNetwork {
         return outputs[outputs.length - 1].toArray();
     }
 
+
+    #createLayers(layerNodesCounts) {
+        /**
+         * @type Array.<Layer>
+         */
+        this.layers = []
+        this.layers.push(new Layer(
+                layerNodesCounts[0],
+                layerNodesCounts[0],
+                this.activation,
+                Layer.INPUT
+        ))
+
+        for (let i = 0; i < layerNodesCounts.length - 1; i++) {
+            let layerType = Layer.HIDDEN;
+            if (i == layerNodesCounts.length - 2) {
+                layerType = Layer.OUTPUT;
+            }
+            this.layers.push(new Layer(
+                    layerNodesCounts[i],
+                    layerNodesCounts[i + 1],
+                    this.activation,
+                    layerType
+            ))
+        }
+    }
+
+    // Argument validator functions
+    #feedforwardArgsValidator(input_array) {
+        let invalid = false;
+        if (input_array.length != this.layerNodesCounts[0]) {
+            invalid = true;
+            console.error("Feedforward failed : Input array and input layer size doesn't match.");
+        }
+        return invalid ? false : true;
+    }
+
+
+    #setActivation(TYPE) {
+        switch (TYPE) {
+            case Activation.SIGMOID:
+                this.activation = Activation.sigmoid;
+                this.activation_derivative = Activation.sigmoid_derivative;
+                break;
+            case Activation.ReLU:
+                this.activation = Activation.relu;
+                this.activation_derivative = Activation.relu_derivative;
+                break;
+            default:
+                console.error('Activation type invalid, setting sigmoid by default');
+                this.activation = Activation.sigmoid;
+                this.activation_derivative = Activation.sigmoid_derivative;
+        }
+    }
+}
+
+class TrainableNeuralNetwork extends NeuralNetwork {
+    learningRate;
+
+    constructor(layerNodesCounts, activation = Activation.SIGMOID, learningRate = 0.1) {
+        super(layerNodesCounts, activation);
+        this.learningRate = learningRate;
+    }
     /**
      * Trains with back propogation
      * @param {Array} input - Array of input values
@@ -106,7 +140,7 @@ class NeuralNetwork {
 
     calculateLoss(targetMatrix) {
         this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex -1].layerError);
+            this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex - 1].layerError);
         })
     }
 
@@ -126,23 +160,27 @@ class NeuralNetwork {
     }
 
 
-    setActivation(TYPE) {
-        switch (TYPE) {
-            case NeuralNetwork.SIGMOID:
-                this.activation = NeuralNetwork.sigmoid;
-                this.activation_derivative = NeuralNetwork.sigmoid_derivative;
-                break;
-            case NeuralNetwork.ReLU:
-                this.activation = NeuralNetwork.relu;
-                this.activation_derivative = NeuralNetwork.relu_derivative;
-                break;
-            default:
-                console.error('Activation type invalid, setting sigmoid by default');
-                this.activation = NeuralNetwork.sigmoid;
-                this.activation_derivative = NeuralNetwork.sigmoid_derivative;
+    #trainArgsValidator(input_array, target_array) {
+        let invalid = false;
+        if (input_array.length != this.layerNodesCounts[0]) {
+            console.error("Training failed : Input array and input layer size doesn't match.");
+            invalid = true;
         }
+        if (target_array.length != this.layerNodesCounts[this.layerNodesCounts.length - 1]) {
+            invalid = true;
+            console.error("Training failed : Target array and output layer size doesn't match.");
+        }
+        return invalid ? false : true;
     }
 
+}
+
+/**
+ * Available activation functions
+ */
+class Activation{
+    static SIGMOID = 1;
+    static ReLU = 2;
 
     // Activation functions
     static sigmoid(x) {
@@ -168,69 +206,37 @@ class NeuralNetwork {
             return 0;
         }
     }
-
-    // Argument validator functions
-    #feedforwardArgsValidator(input_array) {
-        let invalid = false;
-        if (input_array.length != this.layerNodesCounts[0]) {
-            invalid = true;
-            console.error("Feedforward failed : Input array and input layer size doesn't match.");
-        }
-        return invalid ? false : true;
-    }
-
-    #trainArgsValidator(input_array, target_array) {
-        let invalid = false;
-        if (input_array.length != this.layerNodesCounts[0]) {
-            console.error("Training failed : Input array and input layer size doesn't match.");
-            invalid = true;
-        }
-        if (target_array.length != this.layerNodesCounts[this.layerNodesCounts.length - 1]) {
-            invalid = true;
-            console.error("Training failed : Target array and output layer size doesn't match.");
-        }
-        return invalid ? false : true;
-    }
-
 }
 
+/**
+ * Neural network layer
+ */
 class Layer {
     static INPUT = 1
     static HIDDEN = 2
     static OUTPUT = 3
-    layerError = null
-    gradient = null
 
     constructor(inputSize, outputSize, activation, layerType) {
         this.layerType = layerType;
-        this.inputSize = inputSize;
-        this.outputSize = outputSize;
-        let weights_mat = new Matrix(this.outputSize, this.inputSize);
-        weights_mat.randomize()
+        let weights = new Matrix(outputSize, inputSize);
+        weights.randomize()
 
-        let bias_mat = new Matrix(outputSize, 1);
-        bias_mat.randomize()
+        let bias = new Matrix(outputSize, 1);
+        bias.randomize()
 
         this.activation = activation;
-        this.weights = weights_mat;
-        this.biases = bias_mat;
+        this.weights = weights;
+        this.biases = bias;
         this.inputs = new Array(inputSize);
         this.outputs = new Array(outputSize);
 
     }
 
-    static fromWeights(trainedLayer) {
-        let layer = new Layer(
-                trainedLayer.inputSize,
-                trainedLayer.outputSize,
-                NeuralNetwork.sigmoid,
-                trainedLayer.layerType
-        );
-        layer.weights.data = trainedLayer.weights
-        layer.biases.data = trainedLayer.biases;
-        layer.outputs.data = trainedLayer.outputs;
-        layer.inputs = trainedLayer.inputs;
-        return layer
+    loadWeights(trainedLayer) {
+        this.weights.data = trainedLayer.weights
+        this.biases.data = trainedLayer.biases;
+        this.outputs.data = trainedLayer.outputs;
+        this.inputs = trainedLayer.inputs;
     }
 
     getWeights() {
@@ -240,8 +246,6 @@ class Layer {
             outputs: this.outputs.data,
             inputs: this.inputs,
             layerType: this.layerType,
-            inputSize: this.inputSize,
-            outputSize: this.outputSize
         }
     }
 
@@ -270,7 +274,7 @@ class Layer {
             return this.layerError;
         }
         const weightTranspose = Matrix.transpose(this.weights);
-        this.layerError =  Matrix.multiply(weightTranspose, prev_error);
+        this.layerError = Matrix.multiply(weightTranspose, prev_error);
         return this.layerError;
     }
 

@@ -4,11 +4,6 @@ class NeuralNetworkMutable extends NeuralNetwork {
         super(layer_nodes_counts);
     }
 
-    static fromWeights(model) {
-        let network = NeuralNetwork.fromWeights(model);
-        let cast = new NeuralNetworkMutable(network.layerNodesCounts);
-        return Object.assign(cast, network);
-    }
 
     /**
      * Mutates weights and biases of ANN based on rate given

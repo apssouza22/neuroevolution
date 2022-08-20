@@ -1,7 +1,7 @@
 function AND_gate_test() {
     console.log("AND GATE TEST : ");
 
-    let mynn = new NeuralNetwork([2, 1]);
+    let mynn = new TrainableNeuralNetwork([2, 1]);
 
     let training_data = [
         [[1, 1], [1]],

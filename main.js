@@ -14,7 +14,7 @@ let bestCar=cars[0];
 if(localStorage.getItem("bestBrain")){
     console.log("Loading brain from local storage");
     for(let i=0;i<cars.length;i++){
-        cars[i].brain =  NeuralNetworkMutable.fromWeights(JSON.parse(localStorage.getItem("bestBrain")));
+        cars[i].brain.loadWeights(JSON.parse(localStorage.getItem("bestBrain")));
         if(i!=0){
             cars[i].brain.mutate(0.1);
         }
