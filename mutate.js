@@ -12,7 +12,7 @@ class NeuralNetworkMutable extends NeuralNetwork {
 
     /**
      * Mutates weights and biases of ANN based on rate given
-     * @param {float} rate - rate from 0-1
+     * @param {number} rate - rate from 0-1
      */
     mutate(rate) { //rate 0 to 1
         const mutator = (val) => {
@@ -25,6 +25,9 @@ class NeuralNetworkMutable extends NeuralNetwork {
         }
 
         for (let i = 0; i < this.layers.length; i++) {
+            if (this.layers[i].type == Layer.INPUT) {
+                continue;
+            }
             this.layers[i].weights.map(mutator);
             this.layers[i].biases.map(mutator);
         }

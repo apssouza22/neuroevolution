@@ -7,15 +7,12 @@ class NeuralNetwork {
      * Eg : new NeuralNet([3,4,2]); will instantiate ANN with 3 neurons as input layer, 4 as hidden and 2 as output layer
      */
     constructor(layerNodesCounts) {
-        this.layerNodesCounts = layerNodesCounts; // no of neurons per layer
-        this.createLayers(layerNodesCounts);
         NeuralNetwork.SIGMOID = 1;
         NeuralNetwork.ReLU = 2;
-
-        this.activation = null;
-        this.activation_derivative = null;
-        this.setActivation(NeuralNetwork.SIGMOID);
+        this.layerNodesCounts = layerNodesCounts; // no of neurons per layer
         this.learningRate = 0.2;
+        this.setActivation(NeuralNetwork.SIGMOID);
+        this.createLayers(layerNodesCounts);
     }
 
 
@@ -24,20 +21,20 @@ class NeuralNetwork {
         this.layers.push(new Layer(
                 layerNodesCounts[0],
                 layerNodesCounts[0],
-                NeuralNetwork.sigmoid,
+                this.activation,
                 Layer.INPUT
         ))
 
         for (let i = 0; i < layerNodesCounts.length - 1; i++) {
-            let layerName = Layer.HIDDEN;
+            let layerType = Layer.HIDDEN;
             if (i == layerNodesCounts.length - 2) {
-                layerName = Layer.OUTPUT;
+                layerType = Layer.OUTPUT;
             }
             this.layers.push(new Layer(
                     layerNodesCounts[i],
                     layerNodesCounts[i + 1],
-                    NeuralNetwork.sigmoid,
-                    layerName
+                    this.activation,
+                    layerType
             ))
         }
     }
@@ -49,15 +46,9 @@ class NeuralNetwork {
      */
     static fromWeights(model) {
         const nn = new NeuralNetwork(model.layerNodesCounts)
-        let layers = []
-        for (let i = 0; i < model.layerNodesCounts.length - 1; i++) {
-            layers.push(Layer.fromWeights(
-                    model.layers[i],
-                    model.layerNodesCounts[i],
-                    model.layerNodesCounts[i + 1]
-            ))
+        for (const i in nn.layers) {
+            nn.layers[i] = Layer.fromWeights(model.layers[i])
         }
-        nn.layers = layers
         return nn
     }
 
@@ -84,7 +75,6 @@ class NeuralNetwork {
         }
         let inputMat = Matrix.fromArray(input_array)
         let outputs = [];
-        // outputs[0] = inputMat
         for (let i = 0; i < this.layerNodesCounts.length; i++) {
             outputs[i] = this.layers[i].feedForward(inputMat);
             inputMat = outputs[i];
@@ -97,7 +87,7 @@ class NeuralNetwork {
     }
 
     /**
-     * Trains with backpropogation
+     * Trains with back propogation
      * @param {Array} input - Array of input values
      * @param {Array} target - Array of labels
      */
@@ -109,11 +99,11 @@ class NeuralNetwork {
         this.feedForward(input, true); //layer matrices
         let targetMatrix = Matrix.fromArray(target);
 
-        let prev_error;
-        this.loopLayersInReverse(this.layerNodesCounts, (layer_index) => {
-            let layer_error = this.layers[layer_index].calculateErrorLoss(targetMatrix, prev_error);
-            prev_error = layer_error.copy(); //will be used for error calculation in hidden layers
-            this.backPropagation(layer_index, layer_error);
+        let prevError;
+        this.loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
+            let layerError = this.layers[layerIndex].calculateErrorLoss(targetMatrix, prevError);
+            prevError = layerError.copy(); //will be used for error calculation in hidden layers
+            this.backPropagation(layerIndex, layerError);
         })
     }
 
@@ -122,10 +112,10 @@ class NeuralNetwork {
         const nextLayer = this.layers[layerIndex - 1]
 
         //Calculating layer gradient
-        const currentLayerGradient = Matrix.map(currentLayer.outputMat, this.activation_derivative);
+        const currentLayerGradient = Matrix.map(currentLayer.outputs, this.activation_derivative);
         currentLayerGradient.multiply(layerError);
         currentLayerGradient.multiply(this.learningRate);
-        currentLayer.updateWeights(nextLayer.outputMat, currentLayerGradient);
+        currentLayer.updateWeights(nextLayer.outputs, currentLayerGradient);
     }
 
     loopLayersInReverse(layerOutputs, callback) {
@@ -134,9 +124,6 @@ class NeuralNetwork {
         }
     }
 
-    activation(x) {
-        return this.activation(x);
-    }
 
     setActivation(TYPE) {
         switch (TYPE) {
@@ -213,7 +200,9 @@ class Layer {
 
     constructor(inputSize, outputSize, activation, layerType) {
         this.layerType = layerType;
-        let weights_mat = new Matrix(outputSize, inputSize);
+        this.inputSize = inputSize;
+        this.outputSize = outputSize;
+        let weights_mat = new Matrix(this.outputSize, this.inputSize);
         weights_mat.randomize()
 
         let bias_mat = new Matrix(outputSize, 1);
@@ -227,12 +216,17 @@ class Layer {
 
     }
 
-    static fromWeights(trainedLayer, inputSize, outputSize) {
-        let layer = new Layer(inputSize, outputSize, NeuralNetwork.sigmoid, trainedLayer.layerType);
+    static fromWeights(trainedLayer) {
+        let layer = new Layer(
+                trainedLayer.inputSize,
+                trainedLayer.outputSize,
+                NeuralNetwork.sigmoid,
+                trainedLayer.layerType
+        );
         layer.weights.data = trainedLayer.weights
         layer.biases.data = trainedLayer.biases;
+        layer.outputs.data = trainedLayer.outputs;
         layer.inputs = trainedLayer.inputs;
-        layer.outputs = trainedLayer.outputs;
         return layer
     }
 
@@ -240,36 +234,36 @@ class Layer {
         return {
             weights: this.weights.data,
             biases: this.biases.data,
+            outputs: this.outputs.data,
             inputs: this.inputs,
-            outputs: this.outputs
+            layerType: this.layerType,
+            inputSize: this.inputSize,
+            outputSize: this.outputSize
         }
     }
 
     /**
-     *
+     * Feed forward the input matrix to the layer
      * @param {Array} input_array - Array of input values
      * @param {Boolean} GET_ALL_LAYERS - if we need all layers after feed forward instead of just output layer
      */
     feedForward(input) {
         if (this.layerType == Layer.INPUT) {
             this.inputs = input.data;
-            this.outputs = input.data;
-            this.outputMat = input
+            this.outputs = input;
             return input;
         }
         this.inputs = input.data
         input = Matrix.multiply(this.weights, input);
         input.add(this.biases);
-        input.map(this.activation); //activation
-        this.outputs = input.data
-        this.outputMat = input
-        this.weights = this.weights
+        input.map(this.activation);
+        this.outputs = input
         return input
     }
 
     calculateErrorLoss(target_matrix, prev_error) {
         if (this.layerType == Layer.OUTPUT) {
-            return Matrix.add(target_matrix, Matrix.multiply(this.outputMat, -1));
+            return Matrix.add(target_matrix, Matrix.multiply(this.outputs, -1));
         }
         const weightTranspose = Matrix.transpose(this.weights);
         return Matrix.multiply(weightTranspose, prev_error);
