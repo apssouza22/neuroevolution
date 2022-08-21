@@ -27,15 +27,7 @@ function discard() {
     localStorage.removeItem("bestBrain2");
 }
 
-
 function trainGeneticAlgo(time) {
-    setTimeout(() => {
-        console.log("Restarting simulation");
-        if (game.passFirstTrafficCar) {
-            save()
-        }
-        location.reload();
-    }, 60000);
     function animate(time) {
         game.playStep(time);
         requestAnimationFrame(animate);

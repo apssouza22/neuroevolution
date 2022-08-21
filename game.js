@@ -78,11 +78,56 @@ class Game {
                 score: this.bestCar.calcFitness(),
             }
         }
+        reward = this.getRewards(reward);
+        this.drawGame();
 
+        if (this.traffic[0].y > this.bestCar.y) {
+            this.passFirstTrafficCar = true
+        }
+        if (this.passFirstTrafficCar && this.traffic[0].y < this.bestCar.y) {
+            save()
+            this.init()
+        }
+        this.carCtx.restore();
+        this.updateNetworkVisualizer(time);
+        return {
+            reward: reward,
+            gameOver: game_over,
+            score: this.bestCar.calcFitness(),
+        }
+    }
+
+    drawGame() {
+        this.carCanvas.height = window.innerHeight;
+        this.carCtx.save();
+        this.carCtx.translate(0, -this.bestCar.y + this.carCanvas.height * 0.7);
+
+        this.road.draw(this.carCtx);
+        for (const traffic of this.traffic) {
+            traffic.draw(this.carCtx);
+        }
+        this.carCtx.globalAlpha = 0.2;
+        for (const car of this.cars) {
+            car.draw(this.carCtx);
+        }
+
+        this.carCtx.globalAlpha = 1;
+        this.bestCars[0].draw(this.carCtx, true);
+    }
+
+    updateNetworkVisualizer(time) {
+        networkCanvas.height = window.innerHeight;
+        networkCtx.lineDashOffset = -time / 50;
+        if (GAME_INFO.brainMode == "GA") {
+            Visualizer.drawNetwork(networkCtx, this.bestCar.brain);
+        }
+    }
+
+    getRewards(reward) {
         this.bestCar.getSensorData().forEach((sensor, index) => {
                     if (sensor > 0.5) {
                         reward -= sensor
-                    }else{
+                    } else {
                         reward += 0.1
                     }
                 }
@@ -90,45 +135,11 @@ class Game {
         // console.log(reward)
 
         let totalCarsOverTaken = this.traffic.filter(car => car.y > this.bestCar.y).length
-        if(this.totalCarsOvertaken < totalCarsOverTaken) {
+        if (this.totalCarsOvertaken < totalCarsOverTaken) {
             this.totalCarsOvertaken = totalCarsOverTaken
             reward = 10
         }
-        this.carCanvas.height = window.innerHeight;
-        networkCanvas.height = window.innerHeight;
-
-        this.carCtx.save();
-        this.carCtx.translate(0, -this.bestCar.y + this.carCanvas.height * 0.7);
-
-        this.road.draw(this.carCtx);
-        for (let i = 0; i < this.traffic.length; i++) {
-            this.traffic[i].draw(this.carCtx);
-        }
-        this.carCtx.globalAlpha = 0.2;
-        for (let i = 0; i < this.cars.length; i++) {
-            this.cars[i].draw(this.carCtx);
-        }
-        this.carCtx.globalAlpha = 1;
-        this.bestCars[0].draw(this.carCtx, true);
-
-        if (this.traffic[0].y > this.bestCar.y) {
-            this.passFirstTrafficCar = true
-        }
-        if (this.passFirstTrafficCar && this.traffic[0].y < this.bestCar.y) {
-            save()
-            location.reload();
-        }
-        this.carCtx.restore();
-
-        networkCtx.lineDashOffset = -time / 50;
-        if(GAME_INFO.brainMode == "GA") {
-            Visualizer.drawNetwork(networkCtx, this.bestCar.brain);
-        }
-        return {
-            reward: reward,
-            gameOver: game_over,
-            score: this.bestCar.calcFitness(),
-        }
+        return reward;
     }
 
     updateAllRoadCars() {
