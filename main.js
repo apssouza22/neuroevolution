@@ -2,7 +2,7 @@ const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 300;
 const networkCtx = networkCanvas.getContext("2d");
 const GAME_INFO = {
-    brainMode: "LR",
+    brainMode: "GA",
     totalCarsOvertaken: 0,
 }
 let N = 500;

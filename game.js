@@ -14,7 +14,6 @@ class Game {
         this.bestCars = this.cars
         this.passFirstTrafficCar = false
         this.totalCarsOvertaken = 0
-        this.sensors = []
         this.loadCarWeights();
     }
 
@@ -79,13 +78,17 @@ class Game {
                 score: this.bestCar.calcFitness(),
             }
         }
-        this.bestCar.getSensorData().reduce((acc, curr) => {
-            acc += curr
-            return acc
-        })
-        if (this.bestCar.sensor.readings){
 
-        }
+        this.bestCar.getSensorData().forEach((sensor, index) => {
+                    if (sensor > 0.5) {
+                        reward -= sensor
+                    }else{
+                        reward += 0.1
+                    }
+                }
+        )
+        // console.log(reward)
+
         let totalCarsOverTaken = this.traffic.filter(car => car.y > this.bestCar.y).length
         if(this.totalCarsOvertaken < totalCarsOverTaken) {
             this.totalCarsOvertaken = totalCarsOverTaken

@@ -147,7 +147,7 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         return this.feedForward(input, false);
     }
 
-    save(key = "rl-brain") {
+    save(key = "brain") {
         localStorage.setItem(key, JSON.stringify(this.getWeights()));
     }
 
@@ -160,7 +160,9 @@ class TrainableNeuralNetwork extends NeuralNetwork {
             }
             this.layers[layerIndex].calculateErrorLoss(targetMatrix, prevLayer);
         })
+        return this.layers[this.layers.length - 1].layerError;
     }
+
 
     updateWeights() {
         this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {

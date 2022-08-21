@@ -12,6 +12,7 @@ class Agent {
 
     getState(game) {
         let car = game.bestCar
+        car.brain =  this.model
         let sensors = car.getSensorData()
         let coordinates = car.getFutureCoordinates()
         const carBorder = createPolygon(coordinates, car.width, car.height)
@@ -22,7 +23,7 @@ class Agent {
 
             // Move direction
             ...gameCommands,
-            // # Food location (direction)
+            // // # Food location (direction)
             0,
             0,
             1,
@@ -115,6 +116,8 @@ class Memory {
 }
 
 class QTrainer {
+    totalLoss = 0
+    totalTrain=0
     constructor(model, lr, gamma) {
         this.model = model
         this.lr = lr
@@ -125,22 +128,30 @@ class QTrainer {
      * @param {Array} samples
      */
     train(samples  ) {
-        // const target = reward + this.gamma * this.model.predict(next_state)[action]
-        // this.model.train(state, action, target)
-        // let pred = this.model.predict(next_state).reduce((a, b) => a + b, 0)
-
         for (const sample of samples) {
+            this.totalTrain++
             const pred = this.model.predict(sample.state)
             let Q_new = sample.reward
             if (!sample.done) {
-                Q_new =sample.reward + this.gamma * Math.max(...this.model.predict(sample.nextState))
+                Q_new = sample.reward + this.gamma * Math.max(...this.model.predict(sample.nextState))
             }
-            let target = pred
+            let target = [...pred]
             target[argMax(sample.action)] = Q_new
             this.model.calculateLoss(target)
+            let loss = mse(pred, target)
+            this.totalLoss += loss
+            let meanLoss = this.totalLoss / this.totalTrain
+            // console.log(`loss: ${loss} mean loss: ${meanLoss}`)
             this.model.updateWeights()
         }
     }
+}
+function mse(a, b) {
+    let error = 0
+    for (let i = 0; i < a.length; i++) {
+        error += Math.pow((b[i] - a[i]), 2)
+    }
+    return error / a.length
 }
 /**
  * Retrieve the array key corresponding to the largest element in the array.
@@ -153,17 +164,18 @@ function argMax(array) {
 }
 
 function trainRLAgent(game) {
-    let plot_scores = []
     let total_score = 0
     let record = 0
     let agent = new Agent()
+    let gameTimeout = false
     let timeout = setTimeout(() => {
         console.log("Restarting simulation");
-        game.init()
-    }, 60000);
+        gameTimeout = true
+    }, 10000);
     frame()
     function frame(){
         let stateOld = agent.getState(game)
+        // console.log(stateOld)
         gameCommands = agent.getAction(stateOld)
         let {reward, gameOver, score} = game.playStep()
         let stateNew = agent.getState(game)
@@ -171,7 +183,9 @@ function trainRLAgent(game) {
         agent.trainShortMemory(stateOld, gameCommands, reward, stateNew, gameOver)
         agent.remember(stateOld, gameCommands, reward, stateNew, gameOver)
 
-        if (gameOver) {
+        if (gameOver || gameTimeout) {
+        // return
+            gameTimeout=false
             clearInterval(timeout)
             game.init()
             agent.n_games += 1
@@ -183,7 +197,6 @@ function trainRLAgent(game) {
             }
 
             console.log('Game', agent.n_games, 'Score', score, 'Record:', record)
-            plot_scores.push(score)
             total_score += score
             let mean_score = total_score / agent.n_games
             console.log('Mean Score:', mean_score)
