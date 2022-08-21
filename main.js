@@ -2,7 +2,7 @@ const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 300;
 const networkCtx = networkCanvas.getContext("2d");
 const GAME_INFO = {
-    brainMode: "GA",
+    brainMode: "LR",
     totalCarsOvertaken: 0,
 }
 let N = 500;
@@ -27,15 +27,18 @@ function discard() {
     localStorage.removeItem("bestBrain2");
 }
 
-setTimeout(() => {
-    console.log("Restarting simulation");
-    if (game.passFirstTrafficCar) {
-        save()
-    }
-    location.reload();
-}, 60000);
 
 function trainGeneticAlgo(time) {
-    game.playStep(time);
-    requestAnimationFrame(trainGeneticAlgo);
+    setTimeout(() => {
+        console.log("Restarting simulation");
+        if (game.passFirstTrafficCar) {
+            save()
+        }
+        location.reload();
+    }, 60000);
+    function animate(time) {
+        game.playStep(time);
+        requestAnimationFrame(animate);
+    }
+    animate(time)
 }

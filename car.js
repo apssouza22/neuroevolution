@@ -57,7 +57,7 @@ class Car {
                     s => s == null ? 0 : 1 - s.offset
             );
             let outputs = gameCommands
-            if (GAME_INFO.brainMode== "GA") {
+            if (GAME_INFO.brainMode == "GA") {
                 outputs = this.brain.feedForward(offsets, false);
                 outputs = outputs.map(i => i > 0.5 ? 1 : 0)
             }
@@ -71,11 +71,21 @@ class Car {
         }
     }
 
+    getSensorData() {
+        let sensors = [0, 0, 0, 0, 0]
+        if (this.sensor.readings.length > 0) {
+            sensors = this.sensor.readings.map(
+                    s => s == null ? 0 : 1 - s.offset
+            )
+        }
+        return sensors
+    }
+
     /**
      * Calculates how good the car performed on the road
      */
     calcFitness() {
-        return 1000000 - this.y;
+        return Math.floor(1000000 - this.y);
     }
 
 

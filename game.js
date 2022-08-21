@@ -13,6 +13,8 @@ class Game {
         this.bestCar = this.cars[0];
         this.bestCars = this.cars
         this.passFirstTrafficCar = false
+        this.totalCarsOvertaken = 0
+        this.sensors = []
         this.loadCarWeights();
     }
 
@@ -35,6 +37,9 @@ class Game {
     }
 
     loadCarWeights() {
+        if(GAME_INFO.brainMode != "GA") {
+            return
+        }
         if (localStorage.getItem("bestBrain")) {
             console.log("Loading brain from local storage");
             const mom = this.cars[0]
@@ -59,29 +64,31 @@ class Game {
     }
 
     playStep(time = 21792.403) {
-        for (let i = 0; i < this.traffic.length; i++) {
-            this.traffic[i].update(this.road.borders, []);
-        }
-        for (let i = 0; i < this.cars.length; i++) {
-            this.cars[i].update(this.road.borders, this.traffic);
-        }
+        this.updateAllRoadCars();
         let reward = 0
         let game_over = false
 
         this.bestCars = this.cars.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1);
         this.bestCar = this.bestCars[0];
-        if (this.bestCar.damaged) {
+        if (this.bestCar.damaged && GAME_INFO.brainMode != "GA") {
             game_over = true
             reward = -10
             return {
                 reward: reward,
-                game_over: game_over,
+                gameOver: game_over,
                 score: this.bestCar.calcFitness(),
             }
         }
+        this.bestCar.getSensorData().reduce((acc, curr) => {
+            acc += curr
+            return acc
+        })
+        if (this.bestCar.sensor.readings){
+
+        }
         let totalCarsOverTaken = this.traffic.filter(car => car.y > this.bestCar.y).length
-        if(GAME_INFO.totalCarsOvertaken < totalCarsOverTaken) {
-            GAME_INFO.totalCarsOvertaken = totalCarsOverTaken
+        if(this.totalCarsOvertaken < totalCarsOverTaken) {
+            this.totalCarsOvertaken = totalCarsOverTaken
             reward = 10
         }
         this.carCanvas.height = window.innerHeight;
@@ -111,14 +118,24 @@ class Game {
         this.carCtx.restore();
 
         networkCtx.lineDashOffset = -time / 50;
-        Visualizer.drawNetwork(networkCtx, this.bestCar.brain);
+        if(GAME_INFO.brainMode == "GA") {
+            Visualizer.drawNetwork(networkCtx, this.bestCar.brain);
+        }
         return {
             reward: reward,
-            done: game_over,
+            gameOver: game_over,
             score: this.bestCar.calcFitness(),
         }
     }
 
+    updateAllRoadCars() {
+        for (const car of this.traffic) {
+            car.update(this.road.borders, []);
+        }
+        for (const car of this.cars) {
+            car.update(this.road.borders, this.traffic);
+        }
+    }
 }
 
 function isCollision(carBorders, roadBorders, traffic) {

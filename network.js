@@ -154,7 +154,11 @@ class TrainableNeuralNetwork extends NeuralNetwork {
     calculateLoss(target) {
         const targetMatrix = Matrix.fromArray(target)
         this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex - 1].layerError);
+            let prevLayer
+            if(this.layers[layerIndex].layerType != Layer.OUTPUT){
+                prevLayer = this.layers[layerIndex + 1]
+            }
+            this.layers[layerIndex].calculateErrorLoss(targetMatrix, prevLayer);
         })
     }
 
@@ -229,6 +233,7 @@ class Layer {
     static INPUT = 1
     static HIDDEN = 2
     static OUTPUT = 3
+    layerError
 
     constructor(inputSize, outputSize, activation, layerType) {
         this.layerType = layerType;
@@ -282,13 +287,13 @@ class Layer {
         return input
     }
 
-    calculateErrorLoss(target_matrix, prev_error) {
+    calculateErrorLoss(target_matrix, prevLayer) {
         if (this.layerType == Layer.OUTPUT) {
             this.layerError = Matrix.add(target_matrix, Matrix.multiply(this.outputs, -1));
             return this.layerError;
         }
-        const weightTranspose = Matrix.transpose(this.weights);
-        this.layerError = Matrix.multiply(weightTranspose, prev_error);
+        const weightTranspose = Matrix.transpose(prevLayer.weights);
+        this.layerError = Matrix.multiply(weightTranspose, prevLayer.layerError);
         return this.layerError;
     }
 
