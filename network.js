@@ -135,8 +135,8 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         }
 
         this.feedForward(input, true); //layer matrices
-        this.#calculateLoss(Matrix.fromArray(target));
-        this.#updateWeights()
+        this.calculateLoss(target);
+        this.updateWeights()
     }
 
     /**
@@ -151,13 +151,14 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         localStorage.setItem(key, JSON.stringify(this.getWeights()));
     }
 
-    #calculateLoss(targetMatrix) {
+    calculateLoss(target) {
+        const targetMatrix = Matrix.fromArray(target)
         this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
             this.layers[layerIndex].calculateErrorLoss(targetMatrix, this.layers[layerIndex - 1].layerError);
         })
     }
 
-    #updateWeights() {
+    updateWeights() {
         this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
             const currentLayer = this.layers[layerIndex]
             const nextLayer = this.layers[layerIndex - 1]

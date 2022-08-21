@@ -5,34 +5,65 @@ class Agent {
         this.n_games = 0
         this.epsilon = 0 // randomness
         this.gamma = 0.9 // discount rate
-        this.memory = []
+        this.memory = new Memory(500)
         this.model = new TrainableNeuralNetwork([11, 256, 3])
         this.trainer = new QTrainer(this.model, 0.001, this.gamma)
     }
 
     getState(game) {
+        let car = game.bestCar
+        let coordinates = car.getFutureCoordinates()
+        const carBorder = createPolygon(coordinates, car.width, car.height)
+        return [
+            game.bestCar.controls.forward && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with forward
+            game.bestCar.controls.right && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with right
+            game.bestCar.controls.left && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with left
 
+            // Move direction
+            ...gameCommands,
+            // # Food location (direction)
+            0,
+            0,
+            1,
+            0,
+        ]
     }
 
     remember(state, action, reward, nextState, done) {
-        this.memory.push({state, action, reward, nextState, done})
+        this.memory.addSample({
+            state:state,
+            action: action,
+            reward: reward,
+            nextState: nextState,
+            done:done
+        })
     }
 
     trainLongMemory() {
-        var mini_batch = this.memory.splice(0, BATCH_SIZE)
+        const mini_batch = this.memory.sample(BATCH_SIZE)
         this.trainer.train(mini_batch)
     }
 
     trainShortMemory(state, action, reward, nextState, done) {
-        this.trainer.train([{state, action, reward, nextState, done}])
+        this.trainer.train([{
+            state:state,
+            action: action,
+            reward: reward,
+            nextState: nextState,
+            done:done
+        }])
     }
 
     getAction(state) {
         this.epsilon = 80 - this.n_games
-        let finalMove = [0, 0, 0, 0]
+        let finalMove = null
         if (Math.random() < this.epsilon) {
-            let move = Math.floor(Math.random() * 3)
-            finalMove[move] = 1
+            finalMove = [
+                Math.floor(Math.random()) > 0.5 ? 1 : 0, //forward
+                Math.floor(Math.random()) > 0.5 ? 1 : 0, //right
+                Math.floor(Math.random()) > 0.5 ? 1 : 0, //left
+                Math.floor(Math.random()) > 0.5 ? 1 : 0 //reverse
+            ]
         } else {
             let outputs = this.model.predict(state)
             finalMove = outputs.map(i => i > 0.5 ? 1 : 0)
@@ -51,14 +82,12 @@ class Memory {
     }
 
     /**
-     * @param {Array} sample
+     * @param {Object} sample
      */
     addSample(sample) {
         this.samples.push(sample);
         if (this.samples.length > this.maxMemory) {
-            let [state, , , nextState] = this.samples.shift();
-            state.dispose();
-            nextState.dispose();
+            this.samples.shift();
         }
     }
 
@@ -67,7 +96,16 @@ class Memory {
      * @returns {Array} Randomly selected samples
      */
     sample(nSamples) {
-        return sampleSize(this.samples, nSamples);
+        return this.#sampleSize(this.samples, nSamples);
+    }
+
+    #sampleSize([...arr], n = 1) {
+        let m = arr.length;
+        while (m) {
+            const i = Math.floor(Math.random() * m--);
+            [arr[m], arr[i]] = [arr[i], arr[m]];
+        }
+        return arr.slice(0, n);
     }
 }
 
@@ -78,33 +116,45 @@ class QTrainer {
         this.gamma = gamma
     }
 
-    train(state, action, reward, next_state, done) {
-        const target = reward + this.gamma * this.model.predict(next_state)[action]
-        this.model.train(state, action, target)
+    /**
+     * @param {Array} samples
+     */
+    train(samples  ) {
+        return
+        // const target = reward + this.gamma * this.model.predict(next_state)[action]
+        // this.model.train(state, action, target)
+        // let pred = this.model.predict(next_state).reduce((a, b) => a + b, 0)
+
+        for (const sample of samples) {
+            const pred = this.model.predict(sample.state)
+            let Q_new = sample.reward
+            if (!sample.done) {
+                Q_new =sample.reward + this.gamma * this.model.predict(sample.nextState)
+            }
+            const target = Q_new
+            this.model.calculateLoss(target)
+            this.model.updateWeights()
+        }
     }
 }
 
-let gameCommands =  [0,0,0,0]
-let gameInfo = null
-function train() {
+
+function trainRLAgent(game) {
     let plot_scores = []
-    let plot_mean_scores = []
     let total_score = 0
     let record = 0
     let agent = new Agent()
-
-    while (true) {
-        //# get     old    state
-        let state_old = agent.getState(gameInfo)
-        gameCommands = agent.getAction(state_old)
-        let {reward, done, score} = playStep()
-        let stateNew = agent.getState(gameInfo)
-        agent.trainShortMemory(state_old, final_move, reward, stateNew, done)
-        agent.remember(state_old, final_move, reward, stateNew, done)
+    frame()
+    function frame(){
+        let stateOld = agent.getState(game)
+        gameCommands = agent.getAction(stateOld)
+        let {reward, done, score} = game.playStep()
+        let stateNew = agent.getState(game)
+        agent.trainShortMemory(stateOld, gameCommands, reward, stateNew, done)
+        agent.remember(stateOld, gameCommands, reward, stateNew, done)
 
         if (done) {
-            // train        long        memory, plot        result
-            gameReset()
+            game.init()
             agent.n_games += 1
             agent.trainLongMemory()
 
@@ -119,5 +169,6 @@ function train() {
             let mean_score = total_score / agent.n_games
             console.log('Mean Score:', mean_score)
         }
+        requestAnimationFrame(frame);
     }
 }

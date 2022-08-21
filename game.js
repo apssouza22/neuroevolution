@@ -65,8 +65,25 @@ class Game {
         for (let i = 0; i < this.cars.length; i++) {
             this.cars[i].update(this.road.borders, this.traffic);
         }
+        let reward = 0
+        let game_over = false
+
         this.bestCars = this.cars.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1);
         this.bestCar = this.bestCars[0];
+        if (this.bestCar.damaged) {
+            game_over = true
+            reward = -10
+            return {
+                reward: reward,
+                game_over: game_over,
+                score: this.bestCar.calcFitness(),
+            }
+        }
+        let totalCarsOverTaken = this.traffic.filter(car => car.y > this.bestCar.y).length
+        if(GAME_INFO.totalCarsOvertaken < totalCarsOverTaken) {
+            GAME_INFO.totalCarsOvertaken = totalCarsOverTaken
+            reward = 10
+        }
         this.carCanvas.height = window.innerHeight;
         networkCanvas.height = window.innerHeight;
 
@@ -95,5 +112,52 @@ class Game {
 
         networkCtx.lineDashOffset = -time / 50;
         Visualizer.drawNetwork(networkCtx, this.bestCar.brain);
+        return {
+            reward: reward,
+            done: game_over,
+            score: this.bestCar.calcFitness(),
+        }
     }
+
+}
+
+function isCollision(carBorders, roadBorders, traffic) {
+    for (let value of roadBorders) {
+        if (polysIntersect(carBorders, value)) {
+            return true;
+        }
+    }
+    for (let value of traffic) {
+        if (polysIntersect(carBorders, value.polygon)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Creates a polygon around the car to be used for collision detection
+ * @returns {Object[]}
+ */
+function createPolygon(coordinates, width, height) {
+    const points = [];
+    const rad = Math.hypot(width, height) / 2;
+    const alpha = Math.atan2(width, height);
+    points.push({
+        x: coordinates.x - Math.sin(coordinates.angle - alpha) * rad,
+        y: coordinates.y - Math.cos(coordinates.angle - alpha) * rad
+    });
+    points.push({
+        x: coordinates.x - Math.sin(coordinates.angle + alpha) * rad,
+        y: coordinates.y - Math.cos(coordinates.angle + alpha) * rad
+    });
+    points.push({
+        x: coordinates.x - Math.sin(Math.PI + coordinates.angle - alpha) * rad,
+        y: coordinates.y - Math.cos(Math.PI + coordinates.angle - alpha) * rad
+    });
+    points.push({
+        x: coordinates.x - Math.sin(Math.PI + coordinates.angle + alpha) * rad,
+        y: coordinates.y - Math.cos(Math.PI + coordinates.angle + alpha) * rad
+    });
+    return points;
 }

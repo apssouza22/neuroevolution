@@ -1,13 +1,25 @@
 const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 300;
 const networkCtx = networkCanvas.getContext("2d");
-const N = 500;
+const GAME_INFO = {
+    brainMode: "GA",
+    totalCarsOvertaken: 0,
+}
+let N = 500;
+let gameCommands = [1, 1, 0, 0]
 const game = new Game();
-animate();
+if (GAME_INFO.brainMode == "GA") {
+    console.log("Training genetic algorithm");
+    trainGeneticAlgo();
+} else {
+    N = 1;
+    console.log("Training RL Agent ");
+    trainRLAgent(game);
+}
 
 function save() {
-    localStorage.setItem("bestBrain", JSON.stringify(bestCars[0].brain.getWeights()));
-    localStorage.setItem("bestBrain2", JSON.stringify(bestCars[1].brain.getWeights()));
+    localStorage.setItem("bestBrain", JSON.stringify(game.bestCars[0].brain.getWeights()));
+    localStorage.setItem("bestBrain2", JSON.stringify(game.bestCars[1].brain.getWeights()));
 }
 
 function discard() {
@@ -23,8 +35,7 @@ setTimeout(() => {
     location.reload();
 }, 60000);
 
-
-function animate(time) {
+function trainGeneticAlgo(time) {
     game.playStep(time);
-    requestAnimationFrame(animate);
+    requestAnimationFrame(trainGeneticAlgo);
 }
