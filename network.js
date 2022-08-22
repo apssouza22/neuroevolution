@@ -125,7 +125,7 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         this.learningRate = learningRate;
     }
     /**
-     * Trains with back propogation
+     * Trains with back propagation
      * @param {Array} input - Array of input values
      * @param {Array} target - Array of labels
      */
@@ -134,7 +134,7 @@ class TrainableNeuralNetwork extends NeuralNetwork {
             throw new Error("Invalid arguments");
         }
 
-        this.feedForward(input, true); //layer matrices
+        this.feedForward(input, true);
         this.calculateLoss(target);
         this.updateWeights()
     }

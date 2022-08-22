@@ -12,9 +12,13 @@ class Game {
         this.traffic = this.getTraffic();
         this.bestCar = this.cars[0];
         this.bestCars = this.cars
-        this.passFirstTrafficCar = false
         this.totalCarsOvertaken = 0
         this.loadCarWeights();
+        this.timeout = setTimeout(() => {
+            console.log("Restarting game")
+            save()
+            this.init()
+        }, 100000)
     }
 
     getTraffic() {
@@ -65,35 +69,43 @@ class Game {
     playStep(time = 21792.403) {
         this.updateAllRoadCars();
         let reward = 0
-        let game_over = false
+        let gameOver = false
 
-        this.bestCars = this.cars.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1);
+        this.cars = this.cars.map(car => {
+            car.totalCarsOverTaken = this.traffic.filter(traffic => traffic.y > car.y).length
+            return car
+        })
+        this.bestCars = this.cars.sort((a, b) => a.y * -1 > b.y * -1 ? -1 : 1);
         this.bestCar = this.bestCars[0];
         if (this.bestCar.damaged && GAME_INFO.brainMode != "GA") {
-            game_over = true
+            gameOver = true
             reward = -10
             return {
                 reward: reward,
-                gameOver: game_over,
+                gameOver: gameOver,
                 score: this.bestCar.calcFitness(),
             }
         }
-        reward = this.getRewards(reward);
         this.drawGame();
+        reward = this.getRewards(reward, this.bestCar.totalCarsOverTaken);
 
-        if (this.traffic[0].y > this.bestCar.y) {
-            this.passFirstTrafficCar = true
-        }
-        if (this.passFirstTrafficCar && this.traffic[0].y < this.bestCar.y) {
-            save()
-            this.init()
-        }
+        this.restartVerify(this.bestCar.totalCarsOverTaken);
+        this.totalCarsOvertaken = this.bestCar.totalCarsOverTaken >  this.totalCarsOvertaken ? this.bestCar.totalCarsOverTaken : this.totalCarsOvertaken
+
         this.carCtx.restore();
         this.updateNetworkVisualizer(time);
         return {
             reward: reward,
-            gameOver: game_over,
+            gameOver: gameOver,
             score: this.bestCar.calcFitness(),
+        }
+    }
+
+    restartVerify(totalCarsOverTaken) {
+        if (this.totalCarsOvertaken - 2 > totalCarsOverTaken) {
+            clearTimeout(this.timeout)
+            save()
+            this.init()
         }
     }
 
@@ -123,7 +135,7 @@ class Game {
         }
     }
 
-    getRewards(reward) {
+    getRewards(reward, totalCarsOverTaken) {
         this.bestCar.getSensorData().forEach((sensor, index) => {
                     if (sensor > 0.5) {
                         reward -= sensor
@@ -134,11 +146,10 @@ class Game {
         )
         // console.log(reward)
 
-        let totalCarsOverTaken = this.traffic.filter(car => car.y > this.bestCar.y).length
         if (this.totalCarsOvertaken < totalCarsOverTaken) {
-            this.totalCarsOvertaken = totalCarsOverTaken
             reward = 10
         }
+
         return reward;
     }
 

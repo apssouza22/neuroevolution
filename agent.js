@@ -138,11 +138,11 @@ class QTrainer {
             let target = [...pred]
             target[argMax(sample.action)] = Q_new
             this.model.calculateLoss(target)
+            this.model.updateWeights()
             let loss = mse(pred, target)
             this.totalLoss += loss
             let meanLoss = this.totalLoss / this.totalTrain
             // console.log(`loss: ${loss} mean loss: ${meanLoss}`)
-            this.model.updateWeights()
         }
     }
 }

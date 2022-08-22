@@ -5,6 +5,7 @@ class Car {
         this.width = width;
         this.height = height;
 
+        this.totalCarsOvertaken = 0;
         this.speed = 0;
         this.acceleration = 0.2;
         this.maxSpeed = maxSpeed;
@@ -85,7 +86,7 @@ class Car {
      * Calculates how good the car performed on the road
      */
     calcFitness() {
-        return Math.floor(1000000 - this.y);
+        return this.totalCarsOvertaken
     }
 
 
