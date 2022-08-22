@@ -1,29 +1,47 @@
 <!DOCTYPE html>
-    <head>
-        <title>Self-driving car - No libraries</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <canvas id="carCanvas"></canvas>
-        <div id="verticalButtons">
-            <button onclick="save()">Save</button>
-            <button onclick="discard()">Discard</button>
-        </div>
-        <canvas id="networkCanvas"></canvas>
+<head>
+    <title>Self-driving car - No libraries</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="carCanvas"></canvas>
+<div id="verticalButtons">
+    <button onclick="save(this)">Save</button>
+    <button onclick="discard()">Discard</button>
+</div>
+<canvas id="networkCanvas"></canvas>
 
 
-        <script src="visualizer.js"></script>
-        <script src="matrix.js"></script>
-        <script src="network.js"></script>
-        <script src="network-test.js"></script>
-        <script src="mutate.js"></script>
-        <script src="sensor.js"></script>
-        <script src="utils.js"></script>
-        <script src="road.js"></script>
-        <script src="controls.js"></script>
-        <script src="car.js"></script>
-        <script src="game.js"></script>
-        <script src="agent.js"></script>
-        <script src="main.js"></script>
-    </body>
+<script src="visualizer.js"></script>
+<script src="matrix.js"></script>
+<script src="network.js"></script>
+<script src="network-test.js"></script>
+<script src="mutate.js"></script>
+<script src="sensor.js"></script>
+<script src="utils.js"></script>
+<script src="road.js"></script>
+<script src="controls.js"></script>
+<script src="car.js"></script>
+<script src="game.js"></script>
+<script src="agent.js"></script>
+<script src="main.js"></script>
+<div id="nn-info">
+    <p>
+        NeuralNetwork contains virtual "neurons" that are arranged in layers that are connected to each other. The neurons pass on the information and thereby perform calculations.
+    </p>
+    <p>
+        <strong>Weights == arrows</strong> <br>
+        The connections between the neurons also have values associated with them, called weights.
+        Those weights tell us how much the information from one layer matters for the next layer.
+        The weights are displayed in arrows between the neurons. The weights strengths are displayed
+        as the arrows' alphas.
+    </p>
+    <p>
+        <strong>Bias == cycle around neurons</strong> <br>
+        The two parameters WEIGHT and BIAS differ in the extent of their INFLUENCE upon the input data.
+        Simply, bias represents how far off the predictions are from their intended value.
+        Biases make up the DIFFERENCE between the neuron's output and its intended output
+    </p>
+</div>
+</body>
 </html>

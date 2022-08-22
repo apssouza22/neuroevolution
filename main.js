@@ -17,9 +17,12 @@ if (GAME_INFO.brainMode == "GA") {
     trainRLAgent(game);
 }
 
-function save() {
-    localStorage.setItem("bestBrain", JSON.stringify(game.bestCars[0].brain.getWeights()));
-    localStorage.setItem("bestBrain2", JSON.stringify(game.bestCars[1].brain.getWeights()));
+function save(e) {
+    if(game.bestCars[0].totalCarsOvertaken > 0 || e) {
+        console.log("Saving brain to local storage");
+        localStorage.setItem("bestBrain", JSON.stringify(game.bestCars[0].brain.getWeights()));
+        localStorage.setItem("bestBrain2", JSON.stringify(game.bestCars[1].brain.getWeights()));
+    }
 }
 
 function discard() {

@@ -29,3 +29,11 @@ button:hover{
 #carCanvas{
     background:lightgray;
 }
+#nn-info {
+    background: lightgray;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
