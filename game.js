@@ -14,11 +14,15 @@ class Game {
         this.bestCars = this.cars
         this.totalCarsOvertaken = 0
         this.loadCarWeights();
-        this.timeout = setTimeout(() => {
+        this.timeout = setTimeout(this.restart(), 100000)
+    }
+
+    restart() {
+        return () => {
             console.log("Restarting game")
             save()
             this.init()
-        }, 100000)
+        };
     }
 
     getTraffic() {
@@ -102,7 +106,8 @@ class Game {
     }
 
     restartVerify(totalCarsOverTaken) {
-        if (this.totalCarsOvertaken - 2 > totalCarsOverTaken) {
+        const gameOver = this.cars.filter(car => !car.damaged).length == 0;
+        if (this.totalCarsOvertaken - 2 > totalCarsOverTaken || gameOver) {
             clearTimeout(this.timeout)
             save()
             this.init()
