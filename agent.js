@@ -8,11 +8,12 @@ class Agent {
         this.memory = new Memory(500)
         this.model = new TrainableNeuralNetwork([16, 256, 4])
         this.trainer = new QTrainer(this.model, 0.001, this.gamma)
+        this.loadModuleWeights()
     }
 
     getState(game) {
         let car = game.bestCar
-        car.brain =  this.model
+        car.brain = this.model
         let sensors = car.getSensorData()
         let coordinates = car.getFutureCoordinates()
         const carBorder = createPolygon(coordinates, car.width, car.height)
@@ -29,32 +30,32 @@ class Agent {
             1,
             0,
             //     // sensors
-                ...sensors
+            ...sensors
         ]
     }
 
     remember(state, action, reward, nextState, done) {
         this.memory.addSample({
-            state:state,
+            state: state,
             action: action,
             reward: reward,
             nextState: nextState,
-            done:done
+            done: done
         })
     }
 
     trainLongMemory() {
         const mini_batch = this.memory.sample(BATCH_SIZE)
-        this.trainer.train(mini_batch)
+        this.trainer.train(mini_batch, true)
     }
 
     trainShortMemory(state, action, reward, nextState, done) {
         this.trainer.train([{
-            state:state,
+            state: state,
             action: action,
             reward: reward,
             nextState: nextState,
-            done:done
+            done: done
         }])
     }
 
@@ -63,18 +64,27 @@ class Agent {
         let finalMove = null
         if (Math.random() * 200 < this.epsilon) {
             finalMove = [
-                Math.random() > 0.5 ? 1 : 0, //forward
+                // Math.random() > 0.5 ? 1 : 0, //forward
+                    1,
                 Math.random() > 0.5 ? 1 : 0, //right
                 Math.random() > 0.5 ? 1 : 0, //left
-                 0 //reverse
+                0 //reverse
             ]
         } else {
             let outputs = this.model.predict(state)
             finalMove = outputs.map(i => i > 0.5 ? 1 : 0)
             finalMove[3] = 0 //reverse
+            finalMove[0] = 1 //reverse
             // console.log(finalMove)
         }
         return finalMove
+    }
+
+    loadModuleWeights() {
+        if (localStorage.getItem('brain')) {
+            console.log('Loading brain')
+            this.model.loadWeights(JSON.parse(localStorage.getItem("brain")))
+        }
     }
 }
 
@@ -117,7 +127,8 @@ class Memory {
 
 class QTrainer {
     totalLoss = 0
-    totalTrain=0
+    totalTrain = 0
+
     constructor(model, lr, gamma) {
         this.model = model
         this.lr = lr
@@ -127,7 +138,7 @@ class QTrainer {
     /**
      * @param {Array} samples
      */
-    train(samples  ) {
+    train(samples, long = false) {
         for (const sample of samples) {
             this.totalTrain++
             const pred = this.model.predict(sample.state)
@@ -141,11 +152,14 @@ class QTrainer {
             this.model.updateWeights()
             let loss = mse(pred, target)
             this.totalLoss += loss
+        }
+        if (long) {
             let meanLoss = this.totalLoss / this.totalTrain
-            // console.log(`loss: ${loss} mean loss: ${meanLoss}`)
+            console.log(`Mean loss: ${meanLoss}`)
         }
     }
 }
+
 function mse(a, b) {
     let error = 0
     for (let i = 0; i < a.length; i++) {
@@ -153,6 +167,7 @@ function mse(a, b) {
     }
     return error / a.length
 }
+
 /**
  * Retrieve the array key corresponding to the largest element in the array.
  *
@@ -173,7 +188,8 @@ function trainRLAgent(game) {
         gameTimeout = true
     }, 10000);
     frame()
-    function frame(){
+
+    function frame() {
         let stateOld = agent.getState(game)
         // console.log(stateOld)
         gameCommands = agent.getAction(stateOld)
@@ -184,17 +200,17 @@ function trainRLAgent(game) {
         agent.remember(stateOld, gameCommands, reward, stateNew, gameOver)
 
         if (gameOver || gameTimeout) {
-        // return
-            gameTimeout=false
-            clearInterval(timeout)
+            // return
+            gameTimeout = false
+            clearInterval(game.timeout)
             game.init()
             agent.n_games += 1
             agent.trainLongMemory()
 
             if (score > record) {
                 record = score
-                agent.model.save()
             }
+            agent.model.save()
 
             console.log('Game', agent.n_games, 'Score', score, 'Record:', record)
             total_score += score

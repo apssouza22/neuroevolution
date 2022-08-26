@@ -23,7 +23,10 @@ class NeuralNetwork {
             this.layers[i].loadWeights(dict.layers[i])
         }
     }
-
+    /**
+     * Return the trained weights in a JSON object
+     * @returns {Object}
+     */
     getWeights() {
         const layers = []
         for (const layersKey in this.layers) {
@@ -33,6 +36,15 @@ class NeuralNetwork {
             layerNodesCounts: this.layerNodesCounts,
             layers: layers,
         }
+    }
+
+    /**
+     * Save the model weights to local storage
+     * @param {String} key - the local storage key to save the model weights to
+     */
+    save(key = "brain") {
+        console.log("Saving brain to local storage");
+        localStorage.setItem(key, JSON.stringify(this.getWeights()));
     }
 
     /**
@@ -147,9 +159,6 @@ class TrainableNeuralNetwork extends NeuralNetwork {
         return this.feedForward(input, false);
     }
 
-    save(key = "brain") {
-        localStorage.setItem(key, JSON.stringify(this.getWeights()));
-    }
 
     calculateLoss(target) {
         const targetMatrix = Matrix.fromArray(target)

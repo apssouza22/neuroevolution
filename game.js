@@ -87,7 +87,7 @@ class Game {
             return {
                 reward: reward,
                 gameOver: gameOver,
-                score: this.bestCar.calcFitness(),
+                score: this.bestCar.calcFitness() + this.bestCar.y * -1,
             }
         }
         this.drawGame();
