@@ -18,7 +18,7 @@ class Car {
 
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this);
-            this.brain = new NeuralNetworkMutable([this.sensor.rayCount, 6, 4, 4]);
+            this.brain = new NeuroEvolution([this.sensor.rayCount, 6, 4, 4]);
         }
         this.controls = new Controls(controlType);
 
@@ -65,7 +65,7 @@ class Car {
             );
             let outputs = gameCommands
             if (GAME_INFO.brainMode == "GA") {
-                outputs = this.brain.feedForward(offsets, false);
+                outputs = this.brain.nn.feedForward(offsets, false);
                 outputs = outputs.map(i => i > 0.5 ? 1 : 0)
             }
 

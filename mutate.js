@@ -1,7 +1,7 @@
-class NeuralNetworkMutable extends NeuralNetwork {
+class NeuroEvolution{
 
     constructor(layer_nodes_counts) {
-        super(layer_nodes_counts);
+        this.nn = new NeuralNetwork(layer_nodes_counts);
     }
 
 
@@ -20,33 +20,33 @@ class NeuralNetworkMutable extends NeuralNetwork {
             }
         }
 
-        for (let i = 0; i < this.layers.length; i++) {
-            if (this.layers[i].layerType == Layer.INPUT) {
+        for (let i = 0; i < this.nn.layers.length; i++) {
+            if (this.nn.layers[i].layerType == Layer.INPUT) {
                 continue;
             }
-            this.layers[i].weights.map(mutator);
-            this.layers[i].biases.map(mutator);
+            this.nn.layers[i].weights.map(mutator);
+            this.nn.layers[i].biases.map(mutator);
         }
     }
 
     /**
      * Mutate by crossing two neural networks
-     * @param {NeuralNetwork} neuralNetwork - crossover partner
+     * @param {NeuroEvolution} neuralNetwork - crossover partner
      */
     crossover(neuralNetwork) {
         this.#crossoverValidator(neuralNetwork);
-        const offspring = new NeuralNetworkMutable(neuralNetwork.layerNodesCounts);
-        for (let i = 0; i < neuralNetwork.layers.length; i++) {
+        const offspring = new NeuroEvolution(neuralNetwork.nn.layerNodesCounts);
+        for (let i = 0; i < neuralNetwork.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.layers[i].weights = neuralNetwork.layers[i].weights.copy();
+                offspring.nn.layers[i].weights = neuralNetwork.nn.layers[i].weights.copy();
             } else {
-                offspring.layers[i].weights = this.layers[i].weights.copy();
+                offspring.nn.layers[i].weights = this.nn.layers[i].weights.copy();
             }
 
             if (Math.random() < 0.5) {
-                offspring.layers[i].biases = neuralNetwork.layers[i].biases.copy();
+                offspring.nn.layers[i].biases = neuralNetwork.nn.layers[i].biases.copy();
             } else {
-                offspring.layers[i].biases = this.layers[i].biases.copy();
+                offspring.nn.layers[i].biases = this.nn.layers[i].biases.copy();
             }
         }
         return offspring;
@@ -54,10 +54,10 @@ class NeuralNetworkMutable extends NeuralNetwork {
 
 
     #crossoverValidator(network) {
-        if (this instanceof NeuralNetworkMutable) {
-            if (network.layerNodesCounts.length == this.layerNodesCounts.length) {
-                for (let i = 0; i < network.layerNodesCounts.length; i++) {
-                    if (network.layerNodesCounts[i] != this.layerNodesCounts[i]) {
+        if (this instanceof NeuroEvolution) {
+            if (network.nn.layerNodesCounts.length == this.nn.layerNodesCounts.length) {
+                for (let i = 0; i < network.nn.layerNodesCounts.length; i++) {
+                    if (network.nn.layerNodesCounts[i] != this.nn.layerNodesCounts[i]) {
                         throw new Error("Crossover networks must have the same layer nodes counts");
                     }
                 }

@@ -53,8 +53,8 @@ class CarPopulation {
 
     selectionFromStorage() {
         const [mom, dad] = this.selection();
-        mom.brain.loadWeights(JSON.parse(localStorage.getItem("momBrain")));
-        dad.brain.loadWeights(JSON.parse(localStorage.getItem("dadBrain")));
+        mom.brain.nn.loadWeights(JSON.parse(localStorage.getItem("momBrain")));
+        dad.brain.nn.loadWeights(JSON.parse(localStorage.getItem("dadBrain")));
         return [mom, dad];
     }
 
