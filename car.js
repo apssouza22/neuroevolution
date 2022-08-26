@@ -45,6 +45,7 @@ class Car {
         if(this.distanceTravelled < distance){
             this.distanceTravelled = distance;
         }
+        this.totalCarsOverTaken = this.damaged? this.totalCarsOverTaken : traffic.filter(t => t.y > this.y).length
         if (!this.damaged) {
             this.#move();
             this.polygon = createPolygon({

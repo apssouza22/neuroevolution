@@ -18,10 +18,10 @@ if (GAME_INFO.brainMode == "GA") {
 }
 
 function save(e) {
-    const bestCars = game.cars.sort((a, b) => a.calcFitness() >  b.calcFitness() ? -1 : 1);
-    if(bestCars[0].totalCarsOverTaken > 0 || e) {
-        bestCars[0].brain.save("momBrain");
-        bestCars[1].brain.save("dadBrain");
+    const [mom, dad] = game.gaPopulation.selection();
+    if(mom.totalCarsOverTaken > 0 || e) {
+        mom.brain.save("momBrain");
+        dad.brain.save("dadBrain");
     }
 }
 
@@ -32,7 +32,7 @@ function discard() {
 
 function trainGeneticAlgo(time) {
     function animate(time) {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 1; i++) {
             game.playStep(time);
         }
         requestAnimationFrame(animate);
