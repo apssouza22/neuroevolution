@@ -18,21 +18,23 @@ if (GAME_INFO.brainMode == "GA") {
 }
 
 function save(e) {
-    if(game.bestCars[0].totalCarsOvertaken > 0 || e) {
-        console.log("Saving brain to local storage");
-        localStorage.setItem("bestBrain", JSON.stringify(game.bestCars[0].brain.getWeights()));
-        localStorage.setItem("bestBrain2", JSON.stringify(game.bestCars[1].brain.getWeights()));
+    const bestCars = game.cars.sort((a, b) => a.calcFitness() >  b.calcFitness() ? -1 : 1);
+    if(bestCars[0].totalCarsOverTaken > 0 || e) {
+        bestCars[0].brain.save("momBrain");
+        bestCars[1].brain.save("dadBrain");
     }
 }
 
 function discard() {
-    localStorage.removeItem("bestBrain");
-    localStorage.removeItem("bestBrain2");
+    localStorage.removeItem("momBrain");
+    localStorage.removeItem("dadBrain");
 }
 
 function trainGeneticAlgo(time) {
     function animate(time) {
-        game.playStep(time);
+        for (let i = 0; i < 100; i++) {
+            game.playStep(time);
+        }
         requestAnimationFrame(animate);
     }
     animate(time)

@@ -220,3 +220,38 @@ function trainRLAgent(game) {
         requestAnimationFrame(frame);
     }
 }
+
+class LRHelper{
+
+    static checkGameOver(car){
+        if (car.damaged && GAME_INFO.brainMode != "GA") {
+            return {
+                reward: -10,
+                gameOver: true,
+                score: car.calcFitness() + car.y * -1,
+            }
+        }
+        return {
+            gameOver: false,
+        }
+    }
+
+
+    static getRewards(car, reward, prevTotalCarsOverTaken) {
+        car.getSensorData().forEach((sensor, index) => {
+                    if (sensor > 0.5) {
+                        reward -= sensor
+                    } else {
+                        reward += 0.1
+                    }
+                }
+        )
+        // console.log(reward)
+
+        if (prevTotalCarsOverTaken < car.totalCarsOvertaken) {
+            reward = 10
+        }
+
+        return reward;
+    }
+}

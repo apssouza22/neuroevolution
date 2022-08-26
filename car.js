@@ -5,7 +5,8 @@ class Car {
         this.width = width;
         this.height = height;
 
-        this.totalCarsOvertaken = 0;
+        this.totalCarsOverTaken = 0;
+        this.distanceTravelled = 0;
         this.speed = 0;
         this.acceleration = 0.2;
         this.maxSpeed = maxSpeed;
@@ -40,6 +41,10 @@ class Car {
     }
 
     update(roadBorders, traffic) {
+        const distance = this.y * -1;
+        if(this.distanceTravelled < distance){
+            this.distanceTravelled = distance;
+        }
         if (!this.damaged) {
             this.#move();
             this.polygon = createPolygon({
@@ -86,7 +91,7 @@ class Car {
      * Calculates how good the car performed on the road
      */
     calcFitness() {
-        return this.totalCarsOvertaken
+        return this.totalCarsOverTaken
     }
 
 

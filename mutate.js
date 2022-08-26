@@ -7,10 +7,11 @@ class NeuralNetworkMutable extends NeuralNetwork {
 
     /**
      * Mutates weights and biases of ANN based on rate given
-     * @param {number} rate - rate from 0-1
+     * @param {number} rate - rate from 0-1. Porcentage of mutation
      */
-    mutate(rate) { //rate 0 to 1
+    mutate(rate) {
         const mutator = (val) => {
+
             if (Math.random() < rate) {
                 // generate random number between -1 and 1
                 return val + Math.random() * 2 - 1;
@@ -33,9 +34,7 @@ class NeuralNetworkMutable extends NeuralNetwork {
      * @param {NeuralNetwork} neuralNetwork - crossover partner
      */
     crossover(neuralNetwork) {
-        if (!this.#crossoverValidator(neuralNetwork)) {
-            return -1;
-        }
+        this.#crossoverValidator(neuralNetwork);
         const offspring = new NeuralNetworkMutable(neuralNetwork.layerNodesCounts);
         for (let i = 0; i < neuralNetwork.layers.length; i++) {
             if (Math.random() < 0.5) {
@@ -55,24 +54,17 @@ class NeuralNetworkMutable extends NeuralNetwork {
 
 
     #crossoverValidator(network) {
-        let invalid = false;
         if (this instanceof NeuralNetworkMutable) {
             if (network.layerNodesCounts.length == this.layerNodesCounts.length) {
                 for (let i = 0; i < network.layerNodesCounts.length; i++) {
                     if (network.layerNodesCounts[i] != this.layerNodesCounts[i]) {
-                        console.error("Crossover failed : Architecture mismatch (Different number of neurons in one or more layers).");
-                        invalid = true;
-                        break;
+                        throw new Error("Crossover networks must have the same layer nodes counts");
                     }
                 }
-            } else {
-                invalid = true;
-                console.error("Crossover failed : Architecture mismatch (Different number of layers).");
+                return true;
             }
-        } else {
-            invalid = true;
-            console.error("Crossover failed : NeuralNet object expected.");
+            throw new Error("Crossover networks must have the same layer counts");
         }
-        return invalid ? false : true;
+        throw new Error("Crossover networks must be of type NeuralNetworkMutable");
     }
 }
