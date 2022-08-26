@@ -63,7 +63,7 @@ class Game {
         this.drawGame();
         reward = LRHelper.getRewards(this.bestCar, reward, this.totalCarsOvertaken);
 
-        this.restartVerify(this.bestCar.totalCarsOverTaken, time);
+        this.restartVerify(this.bestCar.totalCarsOverTaken);
         this.totalCarsOvertaken = this.bestCar.totalCarsOverTaken > this.totalCarsOvertaken ? this.bestCar.totalCarsOverTaken : this.totalCarsOvertaken
         this.updateNetworkVisualizer(time);
         this.carCtx.restore();
@@ -75,7 +75,7 @@ class Game {
         }
     }
 
-    restartVerify(totalCarsOverTaken, time) {
+    restartVerify(totalCarsOverTaken) {
         const gameOver = this.gaPopulation.isAlive()
         if (gameOver) {
             save()

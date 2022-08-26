@@ -20,8 +20,8 @@ if (GAME_INFO.brainMode == "GA") {
 function save(e) {
     const [mom, dad] = game.gaPopulation.selection();
     if(mom.totalCarsOverTaken > 0 || e) {
-        mom.brain.save("momBrain");
-        dad.brain.save("dadBrain");
+        mom.brain.nn.save("momBrain");
+        dad.brain.nn.save("dadBrain");
     }
 }
 
