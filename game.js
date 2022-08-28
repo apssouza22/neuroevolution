@@ -16,6 +16,7 @@ class Game {
         this.totalCarsOvertaken = 0
         this.loadCarWeights();
         this.totalFramesWithoutOvertaking = 0;
+        this.bestCar = this.gaPopulation.getFirstCar();
         console.log("Initializing game generation " + this.generationCounts);
     }
 

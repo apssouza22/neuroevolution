@@ -2,10 +2,11 @@ const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 300;
 const networkCtx = networkCanvas.getContext("2d");
 const GAME_INFO = {
-    brainMode: "GA",
+    brainMode: "LR",
     totalCarsOvertaken: 0,
 }
 let N = 500;
+const GAME_STEP_PER_FRAME = 1;
 let gameCommands = [1, 1, 0, 0]
 const game = new Game();
 if (GAME_INFO.brainMode == "GA") {
@@ -32,7 +33,7 @@ function discard() {
 
 function trainGeneticAlgo(time) {
     function animate(time) {
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < GAME_STEP_PER_FRAME; i++) {
             game.playStep(time);
         }
         requestAnimationFrame(animate);

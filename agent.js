@@ -6,7 +6,7 @@ class Agent {
         this.epsilon = 0 // randomness
         this.gamma = 0.9 // discount rate
         this.memory = new Memory(500)
-        this.model = new TrainableNeuralNetwork([16, 256, 4])
+        this.model = new TrainableNeuralNetwork([11, 256, 3])
         this.trainer = new QTrainer(this.model, 0.001, this.gamma)
         this.loadModuleWeights()
     }
@@ -18,17 +18,15 @@ class Agent {
         let coordinates = car.getFutureCoordinates()
         const carBorder = createPolygon(coordinates, car.width, car.height)
         return [
+            // Move direction
+            gameCommands[0],
+            gameCommands[1],
+            gameCommands[2],
+
             car.controls.forward && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with forward
             car.controls.right && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with right
             car.controls.left && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with left
 
-            // Move direction
-            ...gameCommands,
-            // // # Food location (direction)
-            0,
-            0,
-            1,
-            0,
             //     // sensors
             ...sensors
         ]
@@ -60,24 +58,22 @@ class Agent {
     }
 
     getAction(state) {
-        this.epsilon = 80 - this.n_games
-        let finalMove = null
+        this.epsilon = 100 - this.n_games
+        let steer = [0, 0, 0]
         if (Math.random() * 200 < this.epsilon) {
-            finalMove = [
-                // Math.random() > 0.5 ? 1 : 0, //forward
-                    1,
+            steer = [
+                Math.random() > 0.5 ? 1 : 0, // forward
                 Math.random() > 0.5 ? 1 : 0, //right
                 Math.random() > 0.5 ? 1 : 0, //left
-                0 //reverse
             ]
         } else {
             let outputs = this.model.predict(state)
-            finalMove = outputs.map(i => i > 0.5 ? 1 : 0)
-            finalMove[3] = 0 //reverse
-            finalMove[0] = 1 //reverse
-            // console.log(finalMove)
+            steer = outputs.map(i => i > 0.5 ? 1 : 0)
+            console.log(steer)
         }
-        return finalMove
+        return [...steer,
+            0 //reverse
+        ]
     }
 
     loadModuleWeights() {
@@ -147,7 +143,12 @@ class QTrainer {
                 Q_new = sample.reward + this.gamma * Math.max(...this.model.predict(sample.nextState))
             }
             let target = [...pred]
-            target[argMax(sample.action)] = Q_new
+            for (const action in sample.action) {
+                if (sample.action[action] > 0) {
+                    target[action] = Q_new
+                }
+            }
+            // target[argMax(sample.action)] = Q_new
             this.model.calculateLoss(target)
             this.model.updateWeights()
             let loss = mse(pred, target)
@@ -183,50 +184,48 @@ function trainRLAgent(game) {
     let record = 0
     let agent = new Agent()
     let gameTimeout = false
-    let timeout = setTimeout(() => {
-        console.log("Restarting simulation");
-        gameTimeout = true
-    }, 10000);
     frame()
 
     function frame() {
-        let stateOld = agent.getState(game)
-        // console.log(stateOld)
-        gameCommands = agent.getAction(stateOld)
-        let {reward, gameOver, score} = game.playStep()
-        let stateNew = agent.getState(game)
-        // console.log(reward)
-        agent.trainShortMemory(stateOld, gameCommands, reward, stateNew, gameOver)
-        agent.remember(stateOld, gameCommands, reward, stateNew, gameOver)
+        for (let i = 0; i < GAME_STEP_PER_FRAME; i++) {
+            let stateOld = agent.getState(game)
+            // console.log(stateOld)
+            gameCommands = agent.getAction(stateOld)
+            let {reward, gameOver, score} = game.playStep()
+            let stateNew = agent.getState(game)
+            // console.log(reward)
+            agent.trainShortMemory(stateOld, gameCommands, reward, stateNew, gameOver)
+            agent.remember(stateOld, gameCommands, reward, stateNew, gameOver)
 
-        if (gameOver || gameTimeout) {
-            // return
-            gameTimeout = false
-            clearInterval(game.timeout)
-            game.init()
-            agent.n_games += 1
-            agent.trainLongMemory()
+            if (gameOver || gameTimeout) {
+                // return
+                gameTimeout = false
+                clearInterval(game.timeout)
+                game.init()
+                agent.n_games += 1
+                agent.trainLongMemory()
 
-            if (score > record) {
-                record = score
+                if (score > record) {
+                    record = score
+                }
+                agent.model.save()
+
+                console.log('Game', agent.n_games, 'Score', score, 'Record:', record)
+                total_score += score
+                let mean_score = total_score / agent.n_games
+                console.log('Mean Score:', mean_score)
             }
-            agent.model.save()
-
-            console.log('Game', agent.n_games, 'Score', score, 'Record:', record)
-            total_score += score
-            let mean_score = total_score / agent.n_games
-            console.log('Mean Score:', mean_score)
         }
         requestAnimationFrame(frame);
     }
 }
 
-class LRHelper{
+class LRHelper {
 
-    static checkGameOver(car){
+    static checkGameOver(car) {
         if (car.damaged && GAME_INFO.brainMode != "GA") {
             return {
-                reward: -10,
+                reward: -100,
                 gameOver: true,
                 score: car.calcFitness() + car.y * -1,
             }
@@ -239,17 +238,21 @@ class LRHelper{
 
     static getRewards(car, reward, prevTotalCarsOverTaken) {
         car.getSensorData().forEach((sensor, index) => {
-                    if (sensor > 0.5) {
-                        reward -= sensor
-                    } else {
-                        reward += 0.1
-                    }
-                }
-        )
-        // console.log(reward)
+            if (sensor > 0.7) {
+                reward -= (sensor * 100) / 5
+            } else {
+                reward += 1
+            }
+        })
+
+        if (car.speed > 1) {
+            reward += 5
+        }else {
+            reward -= 7
+        }
 
         if (prevTotalCarsOverTaken < car.totalCarsOvertaken) {
-            reward = 10
+            reward = 100
         }
 
         return reward;
