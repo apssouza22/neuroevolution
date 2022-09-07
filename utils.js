@@ -58,3 +58,8 @@ function getRandomColor() {
     const hue = 290 + Math.random() * 260;
     return "hsl(" + hue + ", 100%, 60%)";
 }
+
+// Normalize the value to be between 0 and 1
+function normalize(value, min, max) {
+    return (value - min) / (max - min);
+}

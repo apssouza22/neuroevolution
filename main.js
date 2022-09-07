@@ -5,9 +5,12 @@ const GAME_INFO = {
     brainMode: "LR",
     totalCarsOvertaken: 0,
 }
+setTimeout(() => {
+    location.reload();
+}, 1000 * 60 * 5);
 let N = 500;
-const GAME_STEP_PER_FRAME = 1;
-let gameCommands = [1, 1, 0, 0]
+let GAME_STEP_PER_FRAME = 50;
+let gameCommands = [1, 0, 0, 0]
 const game = new Game();
 if (GAME_INFO.brainMode == "GA") {
     console.log("Training genetic algorithm");

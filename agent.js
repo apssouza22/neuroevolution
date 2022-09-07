@@ -68,12 +68,12 @@ class Agent {
             ]
         } else {
             let outputs = this.model.predict(state)
-            steer = outputs.map(i => i > 0.5 ? 1 : 0)
-            console.log(steer)
+            steer[argMax(outputs)] = 1
+            if (steer[1] == 1) {
+                console.log(steer)
+            }
         }
-        return [...steer,
-            0 //reverse
-        ]
+        return steer
     }
 
     loadModuleWeights() {
@@ -143,11 +143,12 @@ class QTrainer {
                 Q_new = sample.reward + this.gamma * Math.max(...this.model.predict(sample.nextState))
             }
             let target = [...pred]
-            for (const action in sample.action) {
-                if (sample.action[action] > 0) {
-                    target[action] = Q_new
-                }
-            }
+            target[argMax(sample.action)] = Q_new
+            // for (const action in sample.action) {
+            //     if (sample.action[action] > 0) {
+            //         target[action] = Q_new
+            //     }
+            // }
             // target[argMax(sample.action)] = Q_new
             this.model.calculateLoss(target)
             this.model.updateWeights()
@@ -187,15 +188,17 @@ function trainRLAgent(game) {
     frame()
 
     function frame() {
+
         for (let i = 0; i < GAME_STEP_PER_FRAME; i++) {
             let stateOld = agent.getState(game)
             // console.log(stateOld)
-            gameCommands = agent.getAction(stateOld)
+            let action = agent.getAction(stateOld)
+            gameCommands = [1, action[1], action[2], 0] // forward, right, left, reverse
             let {reward, gameOver, score} = game.playStep()
             let stateNew = agent.getState(game)
             // console.log(reward)
-            agent.trainShortMemory(stateOld, gameCommands, reward, stateNew, gameOver)
-            agent.remember(stateOld, gameCommands, reward, stateNew, gameOver)
+            agent.trainShortMemory(stateOld, action, reward, stateNew, gameOver)
+            agent.remember(stateOld, action, reward, stateNew, gameOver)
 
             if (gameOver || gameTimeout) {
                 // return
@@ -221,7 +224,7 @@ function trainRLAgent(game) {
 }
 
 class LRHelper {
-
+    static sensorData = []
     static checkGameOver(car) {
         if (car.damaged && GAME_INFO.brainMode != "GA") {
             return {
@@ -238,12 +241,15 @@ class LRHelper {
 
     static getRewards(car, reward, prevTotalCarsOverTaken) {
         car.getSensorData().forEach((sensor, index) => {
-            if (sensor > 0.7) {
-                reward -= (sensor * 100) / 5
-            } else {
-                reward += 1
+            if (sensor > 0.5) {
+                if (LRHelper.sensorData[index] < sensor) {
+                    reward -= (sensor * 100) / 5
+                }
+            }else{
+                reward += 10
             }
         })
+        LRHelper.sensorData = car.getSensorData()
 
         if (car.speed > 1) {
             reward += 5
@@ -254,7 +260,7 @@ class LRHelper {
         if (prevTotalCarsOverTaken < car.totalCarsOvertaken) {
             reward = 100
         }
-
+        // console.log(reward)
         return reward;
     }
 }
