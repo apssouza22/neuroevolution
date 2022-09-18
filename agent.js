@@ -6,7 +6,7 @@ class Agent {
         this.epsilon = 0 // randomness
         this.gamma = 0.9 // discount rate
         this.memory = new Memory(500)
-        this.model = new TrainableNeuralNetwork([11, 256, 3])
+        this.model = new TrainableNeuralNetwork([7, 128,128,3])
         this.trainer = new QTrainer(this.model, 0.001, this.gamma)
         this.loadModuleWeights()
     }
@@ -19,15 +19,13 @@ class Agent {
         const carBorder = createPolygon(coordinates, car.width, car.height)
         return [
             // Move direction
-            gameCommands[0],
             gameCommands[1],
             gameCommands[2],
 
-            car.controls.forward && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with forward
-            car.controls.right && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with right
-            car.controls.left && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with left
+            // car.controls.forward && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with forward
+            // car.controls.right && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with right
+            // car.controls.left && isCollision(carBorder, game.road.borders, game.traffic) ? 1 : 0, //will collide with left
 
-            //     // sensors
             ...sensors
         ]
     }
@@ -61,18 +59,17 @@ class Agent {
         this.epsilon = 100 - this.n_games
         let steer = [0, 0, 0]
         if (Math.random() * 200 < this.epsilon) {
-            steer = [
-                Math.random() > 0.5 ? 1 : 0, // forward
-                Math.random() > 0.5 ? 1 : 0, //right
-                Math.random() > 0.5 ? 1 : 0, //left
+            let random =  [
+                Math.random(), // forward
+                Math.random(), //right
+                Math.random(), //left
             ]
-        } else {
-            let outputs = this.model.predict(state)
-            steer[argMax(outputs)] = 1
-            if (steer[1] == 1) {
-                console.log(steer)
-            }
+            steer[argMax(random)] = 1
         }
+        let outputs = this.model.predict(state)
+        // console.log(outputs)
+        steer[argMax(outputs)] = 1
+
         return steer
     }
 
@@ -180,44 +177,52 @@ function argMax(array) {
     return array.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
 }
 
+/**
+ * @param {Agent} agent
+ * @param {Game} game
+ */
+function stepFrame(agent, game, stats) {
+    let stateOld = agent.getState(game)
+    // console.log(stateOld)
+    let action = agent.getAction(stateOld)
+    gameCommands = [1, action[1], action[2], 0] // forward, right, left, reverse
+    let {reward, gameOver, score} = game.playStep()
+    let stateNew = agent.getState(game)
+    // console.log(reward)
+    agent.trainShortMemory(stateOld, action, reward, stateNew, gameOver)
+    agent.remember(stateOld, action, reward, stateNew, gameOver)
+
+    if (gameOver) {
+        game.init()
+        agent.n_games += 1
+        agent.trainLongMemory()
+
+        if (score > stats.record) {
+            stats.record = score
+        }
+        agent.model.save()
+
+        console.log('Game', agent.n_games, 'Score', score, 'Record:', stats.record)
+        stats.totalScore += score
+        let mean_score = stats.totalScore / agent.n_games
+        console.log('Mean Score:', mean_score)
+    }
+}
+
+/**
+ * @param {Game} game
+ */
 function trainRLAgent(game) {
-    let total_score = 0
-    let record = 0
+    let stats = {
+        totalScore: 0,
+        record:0
+    }
     let agent = new Agent()
-    let gameTimeout = false
     frame()
 
     function frame() {
-
         for (let i = 0; i < GAME_STEP_PER_FRAME; i++) {
-            let stateOld = agent.getState(game)
-            // console.log(stateOld)
-            let action = agent.getAction(stateOld)
-            gameCommands = [1, action[1], action[2], 0] // forward, right, left, reverse
-            let {reward, gameOver, score} = game.playStep()
-            let stateNew = agent.getState(game)
-            // console.log(reward)
-            agent.trainShortMemory(stateOld, action, reward, stateNew, gameOver)
-            agent.remember(stateOld, action, reward, stateNew, gameOver)
-
-            if (gameOver || gameTimeout) {
-                // return
-                gameTimeout = false
-                clearInterval(game.timeout)
-                game.init()
-                agent.n_games += 1
-                agent.trainLongMemory()
-
-                if (score > record) {
-                    record = score
-                }
-                agent.model.save()
-
-                console.log('Game', agent.n_games, 'Score', score, 'Record:', record)
-                total_score += score
-                let mean_score = total_score / agent.n_games
-                console.log('Mean Score:', mean_score)
-            }
+            stepFrame(agent, game, stats);
         }
         requestAnimationFrame(frame);
     }
@@ -225,6 +230,7 @@ function trainRLAgent(game) {
 
 class LRHelper {
     static sensorData = []
+
     static checkGameOver(car) {
         if (car.damaged && GAME_INFO.brainMode != "GA") {
             return {
@@ -245,20 +251,20 @@ class LRHelper {
                 if (LRHelper.sensorData[index] < sensor) {
                     reward -= (sensor * 100) / 5
                 }
-            }else{
-                reward += 10
+            } else {
+                reward += 1
             }
         })
         LRHelper.sensorData = car.getSensorData()
 
-        if (car.speed > 1) {
-            reward += 5
-        }else {
-            reward -= 7
-        }
+        // if (car.speed > 1) {
+        //     reward += 5
+        // } else {
+        //     reward -= 7
+        // }
 
         if (prevTotalCarsOverTaken < car.totalCarsOvertaken) {
-            reward = 100
+            reward = 10
         }
         // console.log(reward)
         return reward;

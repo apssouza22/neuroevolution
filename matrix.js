@@ -29,8 +29,7 @@ class Matrix {
                     }
                 }
             } else {
-                console.error("element wise multiplication failed because of size mismatch!");
-                return -1; //failed bcoz of size mismatch
+                throw new Error('multiplication failed because of size mismatch!');
             }
         } else { //scalar multiply
             for (let i = 0; i < this.rows; i++) {
@@ -142,18 +141,8 @@ class Matrix {
             }
 
             return newmat;
-        } else {
-            if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
-                console.log('tried to add..')
-                m1.print();
-                console.log('this one ...')
-                m2.print();
-                console.error('invaild addition : size mismatch');
-                return -1;
-            }
-            console.error('invaild addition');
-            return -1;
         }
+        throw new Error('invalid addition : size mismatch');
     }
 
     map(func) { //maps this matrix obj

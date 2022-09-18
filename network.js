@@ -53,10 +53,8 @@ class NeuralNetwork {
      * @param {Boolean} GET_ALL_LAYERS - if we need all layers after feed forward instead of just output layer
      * @returns {Array} - the Neural net output for each layer
      */
-    feedForward(input_array, GET_ALL_LAYERS) {
-        if (!this.#feedforwardArgsValidator(input_array)) {
-            throw new Error("Invalid arguments");
-        }
+    feedForward(input_array, GET_ALL_LAYERS=false) {
+        this.#feedforwardArgsValidator(input_array)
         let inputMat = Matrix.fromArray(input_array)
         let outputs = [];
         for (let i = 0; i < this.layerNodesCounts.length; i++) {
@@ -99,12 +97,9 @@ class NeuralNetwork {
 
     // Argument validator functions
     #feedforwardArgsValidator(input_array) {
-        let invalid = false;
         if (input_array.length != this.layerNodesCounts[0]) {
-            invalid = true;
-            console.error("Feedforward failed : Input array and input layer size doesn't match.");
+            throw new Error("Feedforward failed : Input array and input layer size doesn't match.");
         }
-        return invalid ? false : true;
     }
 
 
@@ -142,10 +137,7 @@ class TrainableNeuralNetwork extends NeuralNetwork {
      * @param {Array} target - Array of labels
      */
     train(input, target) {
-        if (!this.#trainArgsValidator(input, target)) {
-            throw new Error("Invalid arguments");
-        }
-
+        this.#trainArgsValidator(input, target)
         this.feedForward(input, true);
         this.calculateLoss(target);
         this.updateWeights()
@@ -190,16 +182,12 @@ class TrainableNeuralNetwork extends NeuralNetwork {
 
 
     #trainArgsValidator(input_array, target_array) {
-        let invalid = false;
         if (input_array.length != this.layerNodesCounts[0]) {
-            console.error("Training failed : Input array and input layer size doesn't match.");
-            invalid = true;
+            throw new Error("Training failed : Input array and input layer size doesn't match.");
         }
         if (target_array.length != this.layerNodesCounts[this.layerNodesCounts.length - 1]) {
-            invalid = true;
-            console.error("Training failed : Target array and output layer size doesn't match.");
+            throw new Error("Training failed : Target array and output layer size doesn't match.");
         }
-        return invalid ? false : true;
     }
 
 }
