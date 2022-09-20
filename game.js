@@ -1,6 +1,6 @@
 class Game {
-    constructor() {
-        this.carCanvas = document.getElementById("carCanvas");
+    constructor(canvas) {
+        this.carCanvas = canvas
         this.carCanvas.width = 200;
         this.carCtx = this.carCanvas.getContext("2d");
         this.road = new Road(this.carCanvas.width / 2, this.carCanvas.width * 0.9);
@@ -51,7 +51,7 @@ class Game {
         }
     }
 
-    playStep(time = 21792.403) {
+    playStep(time = 21792.403, drawGame = true) {
         this.updateAllRoadCars();
         let reward = 0
         let gameOver = false
@@ -61,14 +61,15 @@ class Game {
         if (gameOverResults.gameOver) {
             return gameOverResults
         }
-        this.drawGame();
         reward = LRHelper.getRewards(this.bestCar, reward, this.totalCarsOvertaken);
 
-        this.restartVerify(this.bestCar.totalCarsOverTaken);
+        if (this.restartVerify(this.bestCar.totalCarsOverTaken)){
+            return {reward, gameOver: true,score: this.bestCar.calcFitness(),}
+        }
         this.totalCarsOvertaken = this.bestCar.totalCarsOverTaken > this.totalCarsOvertaken ? this.bestCar.totalCarsOverTaken : this.totalCarsOvertaken
-        this.updateNetworkVisualizer(time);
-        this.carCtx.restore();
-
+        if (drawGame) {
+            game.drawGame();
+        }
         return {
             reward: reward,
             gameOver: gameOver,
@@ -81,13 +82,13 @@ class Game {
         if (gameOver) {
             save()
             this.init()
-            return
+            return true
         }
 
         if (this.totalCarsOvertaken - 2 > totalCarsOverTaken) {
             save()
             this.init()
-            return;
+            return true;
         }
 
         if (this.totalCarsOvertaken >= totalCarsOverTaken) {
@@ -98,8 +99,9 @@ class Game {
         if (this.totalFramesWithoutOvertaking > 500) {
             save()
             this.init()
-            return;
+            return true;
         }
+        return false;
     }
 
     drawGame() {
@@ -112,17 +114,8 @@ class Game {
             traffic.draw(this.carCtx);
         }
         this.gaPopulation.draw(this.carCtx);
-
+        this.carCtx.restore();
     }
-
-    updateNetworkVisualizer(time) {
-        networkCanvas.height = window.innerHeight;
-        networkCtx.lineDashOffset = -time / 50;
-        if (GAME_INFO.brainMode == "GA") {
-            Visualizer.drawNetwork(networkCtx, this.bestCar.brain);
-        }
-    }
-
 
     updateAllRoadCars() {
         for (const car of this.traffic) {
