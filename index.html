@@ -6,12 +6,35 @@
 <body>
 <canvas id="carCanvas"></canvas>
 <div id="verticalButtons">
-    <button onclick="save(this)">Save</button>
-    <button onclick="discard()">Discard</button>
+    <button onclick="save(this)">Save model</button>
+    <button onclick="discard()">Discard model</button>
+    <input id="frame-loop" placeholder="Total loops per frame" onkeyup="updateFrameLoop(this)">
+    <input id="population" placeholder="Total of population" onkeyup="updatePopulation(this)">
 </div>
 <canvas id="networkCanvas"></canvas>
+<div id="nn-info">
+    <p>
+        NeuralNetwork contains virtual "neurons" that are arranged in layers that are connected to each other. The neurons pass on the information and thereby perform calculations.
+    </p>
+    <p>
+        <strong>Weights == arrows</strong> <br>
+        The connections between the neurons also have values associated with them, called weights.
+        Those weights tell us how much the information from one layer matters for the next layer.
+        The weights are displayed in arrows between the neurons. The weights strengths are displayed
+        as the arrow's alphas.
+    </p>
+    <p>
+        <strong>Bias == cycle around neurons</strong> <br>
+        The two parameters WEIGHT and BIAS differ in the extent of their INFLUENCE upon the input data.
+        Simply, bias represents how far off the predictions are from their intended value.
+        The bias strengths are displayed as the cycle's alphas
+    </p>
 
-
+    <p><strong>Network colors:</strong> <br>
+        RED elements are negative values<br>
+        YELLOW are positive values
+    </p>
+</div>
 <script src="networkVisualizer.js"></script>
 <script src="matrix.js"></script>
 <script src="network.js"></script>
@@ -24,28 +47,6 @@
 <script src="population.js"></script>
 <script src="game.js"></script>
 <script src="main.js"></script>
-<div id="nn-info">
-    <p>
-        NeuralNetwork contains virtual "neurons" that are arranged in layers that are connected to each other. The neurons pass on the information and thereby perform calculations.
-    </p>
-    <p>
-        <strong>Weights == arrows</strong> <br>
-        The connections between the neurons also have values associated with them, called weights.
-        Those weights tell us how much the information from one layer matters for the next layer.
-        The weights are displayed in arrows between the neurons. The weights strengths are displayed
-        as the arrows' alphas.
-    </p>
-    <p>
-        <strong>Bias == cycle around neurons</strong> <br>
-        The two parameters WEIGHT and BIAS differ in the extent of their INFLUENCE upon the input data.
-        Simply, bias represents how far off the predictions are from their intended value.
-        Biases make up the DIFFERENCE between the neuron's output and its intended output
-    </p>
 
-    <p><strong>Network colors:</strong> <br>
-        RED elements are negative values<br>
-        YELLOW are positive values
-    </p>
-</div>
 </body>
 </html>

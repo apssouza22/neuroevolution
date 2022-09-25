@@ -37,3 +37,10 @@ button:hover{
     align-items: center;
     padding: 10px;
 }
+input {
+    margin: 3px 0;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+}
