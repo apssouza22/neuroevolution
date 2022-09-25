@@ -42,10 +42,10 @@ class Car {
 
     update(roadBorders, traffic) {
         const distance = this.y * -1;
-        if(this.distanceTravelled < distance){
+        if (this.distanceTravelled < distance) {
             this.distanceTravelled = distance;
         }
-        this.totalCarsOverTaken = this.damaged? this.totalCarsOverTaken : traffic.filter(t => t.y > this.y).length
+        this.totalCarsOverTaken = this.damaged ? this.totalCarsOverTaken : traffic.filter(t => t.y > this.y).length
         if (!this.damaged) {
             this.#move();
             this.polygon = createPolygon({
@@ -63,11 +63,9 @@ class Car {
             const offsets = this.sensor.readings.map(
                     s => s == null ? 0 : 1 - s.offset
             );
-            let outputs = gameCommands
-            if (GAME_INFO.brainMode == "GA") {
-                outputs = this.brain.nn.feedForward(offsets, false);
-                outputs = outputs.map(i => i > 0.5 ? 1 : 0)
-            }
+
+            let outputs = this.brain.nn.feedForward(offsets, false);
+            outputs = outputs.map(i => i > 0.5 ? 1 : 0)
 
             if (this.useBrain) {
                 this.controls.forward = outputs[0];
@@ -76,16 +74,6 @@ class Car {
                 this.controls.reverse = outputs[3];
             }
         }
-    }
-
-    getSensorData() {
-        let sensors = [0, 0, 0, 0, 0]
-        if (this.sensor.readings.length > 0) {
-            sensors = this.sensor.readings.map(
-                    s => s == null ? 0 : 1 - s.offset
-            )
-        }
-        return sensors
     }
 
     /**

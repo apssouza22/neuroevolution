@@ -40,9 +40,6 @@ class Game {
     }
 
     loadCarWeights() {
-        if (GAME_INFO.brainMode != "GA") {
-            return
-        }
         if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
             console.log("Loading brain from local storage");
 
@@ -53,25 +50,17 @@ class Game {
 
     playStep(time = 21792.403, drawGame = true) {
         this.updateAllRoadCars();
-        let reward = 0
         let gameOver = false
 
         this.bestCar = this.gaPopulation.getFirstCar();
-        const gameOverResults = LRHelper.checkGameOver(this.bestCar)
-        if (gameOverResults.gameOver) {
-            return gameOverResults
-        }
-        reward = LRHelper.getRewards(this.bestCar, reward, this.totalCarsOvertaken);
-
         if (this.restartVerify(this.bestCar.totalCarsOverTaken)){
-            return {reward, gameOver: true,score: this.bestCar.calcFitness(),}
+            return {gameOver: true,score: this.bestCar.calcFitness(),}
         }
         this.totalCarsOvertaken = this.bestCar.totalCarsOverTaken > this.totalCarsOvertaken ? this.bestCar.totalCarsOverTaken : this.totalCarsOvertaken
         if (drawGame) {
             game.drawGame();
         }
         return {
-            reward: reward,
             gameOver: gameOver,
             score: this.bestCar.calcFitness(),
         }

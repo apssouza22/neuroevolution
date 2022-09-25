@@ -122,84 +122,12 @@ class NeuralNetwork {
 }
 
 /**
- * Neural Network that implements backpropagation algorithm
- */
-class TrainableNeuralNetwork extends NeuralNetwork {
-    learningRate;
-
-    constructor(layerNodesCounts, activation = Activation.SIGMOID, learningRate = 0.1) {
-        super(layerNodesCounts, activation);
-        this.learningRate = learningRate;
-    }
-    /**
-     * Trains with back propagation
-     * @param {Array} input - Array of input values
-     * @param {Array} target - Array of labels
-     */
-    train(input, target) {
-        this.#trainArgsValidator(input, target)
-        this.feedForward(input, true);
-        this.calculateLoss(target);
-        this.updateWeights()
-    }
-
-    /**
-     * Trains with back propogation
-     * @param {Array} input - Array of input values
-     **/
-    predict(input) {
-        return this.feedForward(input, false);
-    }
-
-
-    calculateLoss(target) {
-        const targetMatrix = Matrix.fromArray(target)
-        this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            let prevLayer
-            if(this.layers[layerIndex].layerType != Layer.OUTPUT){
-                prevLayer = this.layers[layerIndex + 1]
-            }
-            this.layers[layerIndex].calculateErrorLoss(targetMatrix, prevLayer);
-        })
-        return this.layers[this.layers.length - 1].layerError;
-    }
-
-
-    updateWeights() {
-        this.#loopLayersInReverse(this.layerNodesCounts, (layerIndex) => {
-            const currentLayer = this.layers[layerIndex]
-            const nextLayer = this.layers[layerIndex - 1]
-            currentLayer.calculateGradient(this.activation_derivative, this.learningRate);
-            currentLayer.updateWeights(nextLayer.outputs);
-        })
-    }
-
-    #loopLayersInReverse(layerOutputs, callback) {
-        for (let layer_index = layerOutputs.length - 1; layer_index >= 1; layer_index--) {
-            callback(layer_index)
-        }
-    }
-
-
-    #trainArgsValidator(input_array, target_array) {
-        if (input_array.length != this.layerNodesCounts[0]) {
-            throw new Error("Training failed : Input array and input layer size doesn't match.");
-        }
-        if (target_array.length != this.layerNodesCounts[this.layerNodesCounts.length - 1]) {
-            throw new Error("Training failed : Target array and output layer size doesn't match.");
-        }
-    }
-
-}
-
-/**
  * Available activation functions
  */
 class Activation{
     static SIGMOID = 1;
     static ReLU = 2;
 
-    // Activation functions
     static sigmoid(x) {
         return 1 / (1 + Math.exp(-1 * x));
     }
