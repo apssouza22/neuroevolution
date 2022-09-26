@@ -1,6 +1,7 @@
 class Game {
-    constructor(canvas) {
+    constructor(canvas, onGenerationEnd) {
         this.carCanvas = canvas
+        this.onGenerationEnd = onGenerationEnd;
         this.carCanvas.width = 200;
         this.carCtx = this.carCanvas.getContext("2d");
         this.road = new Road(this.carCanvas.width / 2, this.carCanvas.width * 0.9);
@@ -70,12 +71,14 @@ class Game {
         const gameOver = this.gaPopulation.isAlive()
         if (gameOver) {
             save()
+            this.onGenerationEnd(this);
             this.init()
             return true
         }
 
         if (this.totalCarsOvertaken - 2 > totalCarsOverTaken) {
             save()
+            this.onGenerationEnd(this);
             this.init()
             return true;
         }
@@ -87,6 +90,7 @@ class Game {
         }
         if (this.totalFramesWithoutOvertaking > 500) {
             save()
+            this.onGenerationEnd(this);
             this.init()
             return true;
         }

@@ -21,6 +21,10 @@ class CarPopulation {
         })
     }
 
+    /**
+     * Get the first car in the population
+     * @returns {Car}
+     */
     getFirstCar() {
         return this.population.sort((a, b) => a.y < b.y ? -1 : 1)[0];
     }

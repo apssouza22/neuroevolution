@@ -12,29 +12,33 @@
     <input id="population" placeholder="Total of population" onkeyup="updatePopulation(this)">
 </div>
 <canvas id="networkCanvas"></canvas>
-<div id="nn-info">
-    <p>
-        NeuralNetwork contains virtual "neurons" that are arranged in layers that are connected to each other. The neurons pass on the information and thereby perform calculations.
-    </p>
-    <p>
-        <strong>Weights == arrows</strong> <br>
-        The connections between the neurons also have values associated with them, called weights.
-        Those weights tell us how much the information from one layer matters for the next layer.
-        The weights are displayed in arrows between the neurons. The weights strengths are displayed
-        as the arrow's alphas.
-    </p>
-    <p>
-        <strong>Bias == cycle around neurons</strong> <br>
-        The two parameters WEIGHT and BIAS differ in the extent of their INFLUENCE upon the input data.
-        Simply, bias represents how far off the predictions are from their intended value.
-        The bias strengths are displayed as the cycle's alphas
-    </p>
+<section style="padding: 10px">
+    <canvas id="myChart" width="400" height="400"></canvas>
+    <div id="nn-info">
+        <p>
+            NeuralNetwork contains virtual "neurons" that are arranged in layers that are connected to each other. The neurons pass on the information and thereby perform calculations.
+        </p>
+        <p>
+            <strong>Weights == arrows</strong> <br>
+            The connections between the neurons also have values associated with them, called weights.
+            Those weights tell us how much the information from one layer matters for the next layer.
+            The weights are displayed in arrows between the neurons. The weights strengths are displayed
+            as the arrow's alphas.
+        </p>
+        <p>
+            <strong>Bias == cycle around neurons</strong> <br>
+            The two parameters WEIGHT and BIAS differ in the extent of their INFLUENCE upon the input data.
+            Simply, bias represents how far off the predictions are from their intended value.
+            The bias strengths are displayed as the cycle's alphas
+        </p>
 
-    <p><strong>Network colors:</strong> <br>
-        RED elements are negative values<br>
-        YELLOW are positive values
-    </p>
-</div>
+        <p><strong>Network colors:</strong> <br>
+            RED elements are negative values<br>
+            YELLOW are positive values
+        </p>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="networkVisualizer.js"></script>
 <script src="matrix.js"></script>
 <script src="network.js"></script>
