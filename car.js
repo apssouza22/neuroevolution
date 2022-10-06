@@ -18,7 +18,7 @@ class Car {
 
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this);
-            this.brain = new NeuroEvolution([this.sensor.rayCount, 6, 4, 4]);
+            this.dna = new DNA([this.sensor.rayCount, 6, 4, 4]);
         }
         this.controls = new Controls(controlType);
 
@@ -64,7 +64,7 @@ class Car {
                     s => s == null ? 0 : 1 - s.offset
             );
 
-            let outputs = this.brain.nn.feedForward(offsets, false);
+            let outputs = this.dna.nn.feedForward(offsets, false);
             outputs = outputs.map(i => i > 0.5 ? 1 : 0)
 
             if (this.useBrain) {

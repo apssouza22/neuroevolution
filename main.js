@@ -27,8 +27,8 @@ function updatePopulation(input) {
 function save(e) {
     const [mom, dad] = game.gaPopulation.selection();
     if (mom.totalCarsOverTaken > 0 || e) {
-        mom.brain.nn.save("momBrain");
-        dad.brain.nn.save("dadBrain");
+        mom.dna.nn.save("momBrain");
+        dad.dna.nn.save("dadBrain");
     }
 }
 
@@ -42,7 +42,7 @@ function trainGeneticAlgo(time) {
         for (let i = 0; i < gameStepFrameCount; i++) {
             let {gameOver,} = game.playStep(time);
             if (!gameOver) {
-                networkVisualizer.updateNetwork(time, game.bestCar.brain);
+                networkVisualizer.updateNetwork(time, game.bestCar.dna);
             }
         }
         requestAnimationFrame(animate);
@@ -56,7 +56,7 @@ function getChart() {
     const myChart = new Chart(ctx, {
         type: 'line',
         options: {
-            responsive: true,
+            responsive: false,
             scales: {
                 y: {
                     beginAtZero: true

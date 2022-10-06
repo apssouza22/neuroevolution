@@ -1,9 +1,17 @@
-class NeuroEvolution{
+class DNA {
 
     constructor(layer_nodes_counts) {
         this.nn = new NeuralNetwork(layer_nodes_counts);
     }
 
+    /**
+     * Load the pre trained weights(DNA) from a JSON object
+     * @param {NeuralNetwork} dict
+     * @returns {NeuralNetwork}
+     */
+    loadDna(dict) {
+        this.nn.loadWeights(dict);
+    }
 
     /**
      * Mutates weights and biases of ANN based on rate given
@@ -11,7 +19,6 @@ class NeuroEvolution{
      */
     mutate(rate) {
         const mutator = (val) => {
-
             if (Math.random() < rate) {
                 // generate random number between -1 and 1
                 return val + Math.random() * 2 - 1;
@@ -31,11 +38,11 @@ class NeuroEvolution{
 
     /**
      * Mutate by crossing two neural networks
-     * @param {NeuroEvolution} neuralNetwork - crossover partner
+     * @param {DNA} neuralNetwork - crossover partner
      */
     crossover(neuralNetwork) {
         this.#crossoverValidator(neuralNetwork);
-        const offspring = new NeuroEvolution(neuralNetwork.nn.layerNodesCounts);
+        const offspring = new DNA(neuralNetwork.nn.layerNodesCounts);
         for (let i = 0; i < neuralNetwork.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
                 offspring.nn.layers[i].weights = neuralNetwork.nn.layers[i].weights.copy();
@@ -54,7 +61,7 @@ class NeuroEvolution{
 
 
     #crossoverValidator(network) {
-        if (this instanceof NeuroEvolution) {
+        if (this instanceof DNA) {
             if (network.nn.layerNodesCounts.length == this.nn.layerNodesCounts.length) {
                 for (let i = 0; i < network.nn.layerNodesCounts.length; i++) {
                     if (network.nn.layerNodesCounts[i] != this.nn.layerNodesCounts[i]) {

@@ -17,7 +17,7 @@ class Game {
         this.totalCarsOvertaken = 0
         this.loadCarWeights();
         this.totalFramesWithoutOvertaking = 0;
-        this.bestCar = this.gaPopulation.getFirstCar();
+        [this.bestCar,] = this.gaPopulation.selection();
         console.log("Initializing game generation " + this.generationCounts);
     }
 
@@ -44,7 +44,9 @@ class Game {
         if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
             console.log("Loading brain from local storage");
 
-            const [mom, dad] = this.gaPopulation.selectionFromStorage();
+            const [mom, dad] = this.gaPopulation.selection();
+            mom.dna.loadDna(JSON.parse(localStorage.getItem("momBrain")));
+            dad.dna.loadDna(JSON.parse(localStorage.getItem("dadBrain")));
             this.gaPopulation.reproduction(mom, dad);
         }
     }
@@ -53,7 +55,8 @@ class Game {
         this.updateAllRoadCars();
         let gameOver = false
 
-        this.bestCar = this.gaPopulation.getFirstCar();
+        let [mom, ] = this.gaPopulation.selection();
+        this.bestCar = mom;
         if (this.restartVerify(this.bestCar.totalCarsOverTaken)){
             return {gameOver: true,score: this.bestCar.calcFitness(),}
         }
@@ -68,7 +71,7 @@ class Game {
     }
 
     restartVerify(totalCarsOverTaken) {
-        const gameOver = this.gaPopulation.isAlive()
+        const gameOver = this.gaPopulation.hasAlive()
         if (gameOver) {
             save()
             this.onGenerationEnd(this);
@@ -106,7 +109,7 @@ class Game {
         for (const traffic of this.traffic) {
             traffic.draw(this.carCtx);
         }
-        this.gaPopulation.draw(this.carCtx);
+        this.drawCars();
         this.carCtx.restore();
     }
 
@@ -114,7 +117,19 @@ class Game {
         for (const car of this.traffic) {
             car.update(this.road.borders, []);
         }
-        this.gaPopulation.update(this.road.borders, this.traffic);
+        this.gaPopulation.population.forEach(car => {
+            car.update(this.road.borders, this.traffic)
+        })
+    }
+
+    drawCars() {
+        this.carCtx.globalAlpha = 0.2;
+        for (const car of this.gaPopulation.population) {
+            car.draw(this.carCtx);
+        }
+        this.carCtx.globalAlpha = 1;
+        let [mom, ] = this.gaPopulation.selection()
+        mom.draw(this.carCtx, true);
     }
 }
 

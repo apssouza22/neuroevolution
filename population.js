@@ -11,22 +11,8 @@ class CarPopulation {
 
     generateCars(road) {
         for (let i = 0; i < this.population.length; i++) {
-            this.population[i]=new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
+            this.population[i] = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
         }
-    }
-
-    update(roadBorders, traffic) {
-        this.population.forEach(car => {
-            car.update(roadBorders, traffic)
-        })
-    }
-
-    /**
-     * Get the first car in the population
-     * @returns {Car}
-     */
-    getFirstCar() {
-        return this.population.sort((a, b) => a.y < b.y ? -1 : 1)[0];
     }
 
     /**
@@ -47,31 +33,19 @@ class CarPopulation {
             if (car === mom || car === dad) {
                 continue;
             }
-            let momgenes = mom.brain;
-            let dadgenes = dad.brain;
-            let child = momgenes.crossover(dadgenes);
-            child.mutate(this.mutationRate);
-            car.brain = child
+            let momDna = mom.dna;
+            let dadDna = dad.dna;
+            let childDna = momDna.crossover(dadDna);
+            childDna.mutate(this.mutationRate);
+            car.dna = childDna
         }
     }
 
-    selectionFromStorage() {
-        const [mom, dad] = this.selection();
-        mom.brain.nn.loadWeights(JSON.parse(localStorage.getItem("momBrain")));
-        dad.brain.nn.loadWeights(JSON.parse(localStorage.getItem("dadBrain")));
-        return [mom, dad];
-    }
-
-    isAlive() {
+    /**
+     * Check if the population is dead
+     * @return {boolean}
+     */
+    hasAlive() {
         return this.population.filter(car => !car.damaged).length == 0;
-    }
-
-    draw(carCtx) {
-        carCtx.globalAlpha = 0.2;
-        for (const car of this.population) {
-            car.draw(carCtx);
-        }
-        carCtx.globalAlpha = 1;
-        this.getFirstCar().draw(carCtx, true);
     }
 }
