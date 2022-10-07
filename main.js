@@ -2,9 +2,12 @@ let populationCount = 500;
 let gameStepFrameCount = 1;
 const networkVisualizer = new NetworkVisualizer(document.getElementById("networkCanvas"));
 let chart = getChart()
-const game = new Game(document.getElementById("carCanvas"), (game) => {
+const game = new Game(
+        document.getElementById("carCanvas"),
+        new CarPopulation(populationCount),
+        (game) => {
     chart.data.labels.push(game.generationCounts);
-    const [mom, dad] = game.gaPopulation.selection();
+    const [mom, dad] = game.evolution.select();
     console.log(mom.totalCarsOverTaken)
     chart.data.datasets.forEach((dataset) => {
         dataset.data.push(mom.totalCarsOverTaken);
@@ -20,15 +23,15 @@ function updateFrameLoop(input) {
 function updatePopulation(input) {
     populationCount = input.value == "" ? 500 : parseInt(input.value);
     populationCount = populationCount < 2 ? 2 : populationCount;
-    game.gaPopulation = new CarPopulation(populationCount, 0.1);
+    game.evolution = new GeneticEvolution(populationCount, 0.1);
     game.init();
 }
 
 function save(e) {
-    const [mom, dad] = game.gaPopulation.selection();
+    const [mom, dad] = game.evolution.select();
     if (mom.totalCarsOverTaken > 0 || e) {
-        mom.dna.nn.save("momBrain");
-        dad.dna.nn.save("dadBrain");
+        mom.dna.saveDNA("momBrain");
+        dad.dna.saveDNA("dadBrain");
     }
 }
 

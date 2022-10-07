@@ -1,23 +1,33 @@
+
 class Game {
-    constructor(canvas, onGenerationEnd) {
+
+    /**
+     * Constructor
+     * @param canvas
+     * @param {CarPopulation} carPopulation
+     * @param {(Game)=>{}}onGenerationEnd callback function for when a generation ends
+     */
+    constructor(canvas, carPopulation, onGenerationEnd) {
         this.carCanvas = canvas
         this.onGenerationEnd = onGenerationEnd;
+        this.carPopulation = carPopulation;
         this.carCanvas.width = 200;
         this.carCtx = this.carCanvas.getContext("2d");
         this.road = new Road(this.carCanvas.width / 2, this.carCanvas.width * 0.9);
         this.generationCounts = 0;
-        this.gaPopulation = new CarPopulation(populationCount, 0.1);
+        this.evolution = new GeneticEvolution(populationCount, 0.1);
         this.init();
     }
 
     init() {
         this.generationCounts++;
-        this.gaPopulation.generateCars(this.road)
+        this.carPopulation.generateCars(this.road.getLaneCenter(1));
+        this.evolution = new GeneticEvolution(this.carPopulation, 0.1);
+        this.evolution.loadDna();
         this.traffic = this.getTraffic();
-        this.totalCarsOvertaken = 0
-        this.loadCarWeights();
+        this.totalCarsOvertaken = 0;
         this.totalFramesWithoutOvertaking = 0;
-        [this.bestCar,] = this.gaPopulation.selection();
+        this.bestCar = this.carPopulation.getSorted()[0];
         console.log("Initializing game generation " + this.generationCounts);
     }
 
@@ -40,23 +50,12 @@ class Game {
         ];
     }
 
-    loadCarWeights() {
-        if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
-            console.log("Loading brain from local storage");
-
-            const [mom, dad] = this.gaPopulation.selection();
-            mom.dna.loadDna(JSON.parse(localStorage.getItem("momBrain")));
-            dad.dna.loadDna(JSON.parse(localStorage.getItem("dadBrain")));
-            this.gaPopulation.reproduction(mom, dad);
-        }
-    }
 
     playStep(time = 21792.403, drawGame = true) {
         this.updateAllRoadCars();
         let gameOver = false
 
-        let [mom, ] = this.gaPopulation.selection();
-        this.bestCar = mom;
+        this.bestCar = this.carPopulation.getSorted()[0];
         if (this.restartVerify(this.bestCar.totalCarsOverTaken)){
             return {gameOver: true,score: this.bestCar.calcFitness(),}
         }
@@ -71,7 +70,7 @@ class Game {
     }
 
     restartVerify(totalCarsOverTaken) {
-        const gameOver = this.gaPopulation.hasAlive()
+        const gameOver = this.carPopulation.hasAlive()
         if (gameOver) {
             save()
             this.onGenerationEnd(this);
@@ -117,20 +116,22 @@ class Game {
         for (const car of this.traffic) {
             car.update(this.road.borders, []);
         }
-        this.gaPopulation.population.forEach(car => {
+        this.carPopulation.get().forEach(car => {
             car.update(this.road.borders, this.traffic)
         })
     }
 
     drawCars() {
         this.carCtx.globalAlpha = 0.2;
-        for (const car of this.gaPopulation.population) {
+        for (const car of this.carPopulation.get()) {
             car.draw(this.carCtx);
         }
         this.carCtx.globalAlpha = 1;
-        let [mom, ] = this.gaPopulation.selection()
+        let [mom, ] = this.evolution.select()
         mom.draw(this.carCtx, true);
     }
+
+
 }
 
 function isCollision(carBorders, roadBorders, traffic) {

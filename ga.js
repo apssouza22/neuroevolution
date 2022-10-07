@@ -1,3 +1,54 @@
+// Class responsible for handle the genetic evolution of the population
+class GeneticEvolution {
+    /**
+     * @param {CarPopulation} populationHandler
+     * @param {number}m
+     */
+    constructor(populationHandler, m) {
+        this.populationHandler = populationHandler;
+        this.mutationRate = m; // Mutation rate 0-1
+    }
+
+    /**
+     * Select the best cars from the population (elitism)
+     */
+    select() {
+        const bestCars = this.populationHandler.getSorted();
+        return [bestCars[0], bestCars[1]];
+    }
+
+    /**
+     * Create a new generation of cars
+     * @param {Car} mom
+     * @param {Car} dad
+     */
+    reproduce(mom, dad) {
+        for (const p of this.populationHandler.get()) {
+            if (p === mom || p === dad) {
+                continue;
+            }
+            let momDna = mom.dna;
+            let dadDna = dad.dna;
+            let childDna = momDna.crossover(dadDna);
+            childDna.mutate(this.mutationRate);
+            p.dna = childDna
+        }
+    }
+
+    loadDna() {
+        if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
+            console.log("Loading DNA from local storage");
+
+            const [mom, dad] = this.select();
+            mom.dna.loadDna(JSON.parse(localStorage.getItem("momBrain")));
+            dad.dna.loadDna(JSON.parse(localStorage.getItem("dadBrain")));
+            this.reproduce(mom, dad);
+        }
+
+    }
+}
+
+// Class responsible for performing the genetic operations
 class DNA {
 
     constructor(layer_nodes_counts) {
@@ -11,6 +62,14 @@ class DNA {
      */
     loadDna(dict) {
         this.nn.loadWeights(dict);
+    }
+
+    /**
+     * Save DNA to local storage
+     * @param {String} key - the local storage key to save the model weights to
+     */
+    saveDNA(key = "brain") {
+        this.nn.save(key);
     }
 
     /**
@@ -73,5 +132,35 @@ class DNA {
             throw new Error("Crossover networks must have the same layer counts");
         }
         throw new Error("Crossover networks must be of type NeuralNetworkMutable");
+    }
+}
+
+class CarPopulation {
+    constructor(count = 100) {
+        this.count = count;
+        this.population = [];
+    }
+
+    generateCars(x) {
+        for (let i = 0; i < this.count; i++) {
+            this.population[i] = new Car(x, 100, 30, 50, "AI");
+        }
+    }
+
+    getSorted() {
+        this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
+        return this.population;
+    }
+
+    get() {
+        return this.population;
+    }
+
+    /**
+     * Check if anyone in population is alive
+     * @return {boolean}
+     */
+    hasAlive() {
+        return this.population.filter(car => !car.damaged).length == 0;
     }
 }
