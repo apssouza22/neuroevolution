@@ -7,9 +7,8 @@ class NeuralNetwork {
      * @param  {Array} layerNodesCounts - array of counts of neurons in each layer
      * Eg : new NeuralNet([3,4,2]); will instantiate NN with 3 neurons as input layer, 4 as hidden and 2 as output layer
      */
-    constructor(layerNodesCounts,activation = Activation.SIGMOID) {
+    constructor(layerNodesCounts) {
         this.layerNodesCounts = layerNodesCounts; // no of neurons per layer
-        this.#setActivation(activation);
         this.#createLayers(layerNodesCounts);
     }
 
@@ -77,7 +76,7 @@ class NeuralNetwork {
         this.layers.push(new Layer(
                 layerNodesCounts[0],
                 layerNodesCounts[0],
-                this.activation,
+                Activation.SIGMOID,
                 Layer.INPUT
         ))
 
@@ -89,7 +88,7 @@ class NeuralNetwork {
             this.layers.push(new Layer(
                     layerNodesCounts[i],
                     layerNodesCounts[i + 1],
-                    this.activation,
+                    Activation.SIGMOID,
                     layerType
             ))
         }
@@ -102,31 +101,44 @@ class NeuralNetwork {
         }
     }
 
-
-    #setActivation(TYPE) {
-        switch (TYPE) {
-            case Activation.SIGMOID:
-                this.activation = Activation.sigmoid;
-                this.activation_derivative = Activation.sigmoid_derivative;
-                break;
-            case Activation.ReLU:
-                this.activation = Activation.relu;
-                this.activation_derivative = Activation.relu_derivative;
-                break;
-            default:
-                console.error('Activation type invalid, setting sigmoid by default');
-                this.activation = Activation.sigmoid;
-                this.activation_derivative = Activation.sigmoid_derivative;
-        }
-    }
 }
 
 /**
  * Available activation functions
  */
-class Activation{
+class Activation {
     static SIGMOID = 1;
     static ReLU = 2;
+
+    /**
+     * Create a new activation function pair (activation and derivative)
+     * @param {int} activationType
+     * @returns {{
+     *   derivative: ((function(number): (number))),
+     *   activation: ((function(number): (number)))
+     * }}
+     */
+    static create(activationType) {
+        switch (activationType) {
+            case Activation.ReLU:
+                return {
+                    activation: Activation.#relu,
+                    derivative: Activation.#relu_derivative
+                }
+            case Activation.SIGMOID:
+                return {
+                    activation: Activation.sigmoid,
+                    derivative: Activation.sigmoid_derivative
+                }
+            default:
+                console.error('Activation type invalid, setting relu by default');
+                return {
+                    activation: Activation.sigmoid,
+                    derivative: Activation.sigmoid_derivative
+                }
+        }
+    }
+
 
     static sigmoid(x) {
         return 1 / (1 + Math.exp(-1 * x));
@@ -135,23 +147,37 @@ class Activation{
     static sigmoid_derivative(y) {
         return y * (1 - y);
     }
-
-    static relu(x) {
+    /**
+     * Rectified Linear Unit (ReLU) activation function
+     * This function outputs 1 (one) if its weighted input plus bias is positive or zero,
+     * and it outputs 0 (zero) if its weighted input plus bias is negative.
+     * In other words, the neuron either fires or doesn't
+     * @param {number} x
+     * @return {number|*}
+     */
+    static #relu(x) {
         if (x >= 0) {
             return x;
-        } else {
-            return 0;
         }
+        return 0;
+
     }
 
-    static relu_derivative(y) {
-        if (y > 0) {
+    /**
+     * Derivative of ReLU function
+     *
+     * @param {number} x
+     * @return {number}
+     */
+    static #relu_derivative(x) {
+        if (x > 0) {
             return 1;
-        } else {
-            return 0;
         }
+        return 0;
     }
 }
+
+
 
 /**
  * Neural network layer
@@ -160,22 +186,40 @@ class Layer {
     static INPUT = 1
     static HIDDEN = 2
     static OUTPUT = 3
-    layerError
+    /**
+     * Learning occurs, in part, by the strengthening of connections between neurons
+     * With weighted inputs, the network can increase or decrease the strength of the connection between each neuron in this layer and the neurons in the next layer
+     * Weights are the co-efficients of the equation which you are trying to resolve during the training phase
+     * @type {Matrix}
+     */
+    weights
+    /**
+     * While weights enable an artificial neural network to adjust the strength of connections between neurons,
+     * bias can be used to make adjustments within neurons
+     * Basically the addition of bias reduces the variance and hence introduces flexibility and better generalisation to the neural network(non-linearity).
+     * @type {Matrix}
+     */
+    biases
 
+    /**
+     * @type {Matrix}
+     */
+    outputs
+
+    /**
+     * Constructor
+     * @param {int} inputSize
+     * @param {int}outputSize
+     * @param {number} activation
+     * @param {number} layerType
+     */
     constructor(inputSize, outputSize, activation, layerType) {
         this.layerType = layerType;
-        let weights = new Matrix(outputSize, inputSize);
-        weights.randomize()
-
-        let bias = new Matrix(outputSize, 1);
-        bias.randomize()
-
-        this.activation = activation;
-        this.weights = weights;
-        this.biases = bias;
+        this.activationFun = Activation.create(activation);
+        this.weights = Matrix.randomize(outputSize, inputSize);
+        this.biases = Matrix.randomize(outputSize, 1);
         this.inputs = new Array(inputSize);
-        this.outputs = new Array(outputSize);
-
+        this.outputs = Matrix.randomize(outputSize, 1);
     }
 
     loadWeights(trainedLayer) {
@@ -197,48 +241,27 @@ class Layer {
 
     /**
      * Feed forward the input matrix to the layer
-     * @param {Array} input_array - Array of input values
-     * @param {Boolean} GET_ALL_LAYERS - if we need all layers after feed forward instead of just output layer
+     * In an artificial neural network, learning occurs in the following fashion:
+     *   - Each neuron (also referred to as a "node") receives one or more inputs from an external source or from other neurons.
+     *   - Each input is multiplied by a weight to indicate the input's relative importance.
+     *   - Bias is added to the sum of the weighted inputs.
+     *   - An activation function within the neuron performs a calculation on the total.
+     *   - The result is the neuron's output, which is passed to other neurons or delivered to the external world as the machine's output.
+     *
+     * @param {Matrix} input_array - Array of input values
+     * @returns {Matrix} - Array of output values
      */
     feedForward(input) {
+        this.inputs = input.data
         if (this.layerType == Layer.INPUT) {
-            this.inputs = input.data;
             this.outputs = input;
             return input;
         }
-        this.inputs = input.data
-        input = Matrix.multiply(this.weights, input);
-        input.add(this.biases);
-        input.map(this.activation);
-        this.outputs = input
-        return input
-    }
-
-    calculateErrorLoss(target_matrix, prevLayer) {
-        if (this.layerType == Layer.OUTPUT) {
-            this.layerError = Matrix.add(target_matrix, Matrix.multiply(this.outputs, -1));
-            return this.layerError;
-        }
-        const weightTranspose = Matrix.transpose(prevLayer.weights);
-        this.layerError = Matrix.multiply(weightTranspose, prevLayer.layerError);
-        return this.layerError;
-    }
-
-    updateWeights(nextLayerOutput) {
-        //Calculating delta weights
-        const nextLayerOutputTransposed = Matrix.transpose(nextLayerOutput);
-        const nextWeightsDelta = Matrix.multiply(this.gradient, nextLayerOutputTransposed);
-
-        //Updating weights and biases
-        this.weights.add(nextWeightsDelta);
-        this.biases.add(this.gradient);
-    }
-
-
-    calculateGradient(activation_derivative, learningRate) {
-        this.gradient = Matrix.map(this.outputs, activation_derivative);
-        this.gradient.multiply(this.layerError);
-        this.gradient.multiply(learningRate);
+        let output = Matrix.multiply(this.weights, input);
+        output.add(this.biases);
+        output.map(this.activationFun.activation);
+        this.outputs = output
+        return output
     }
 
 }

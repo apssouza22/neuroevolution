@@ -44,7 +44,6 @@ class GeneticEvolution {
             dad.dna.loadDna(JSON.parse(localStorage.getItem("dadBrain")));
             this.reproduce(mom, dad);
         }
-
     }
 }
 
@@ -104,15 +103,15 @@ class DNA {
         const offspring = new DNA(neuralNetwork.nn.layerNodesCounts);
         for (let i = 0; i < neuralNetwork.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].weights = neuralNetwork.nn.layers[i].weights.copy();
+                offspring.nn.layers[i].weights = Matrix.copy(neuralNetwork.nn.layers[i].weights);
             } else {
-                offspring.nn.layers[i].weights = this.nn.layers[i].weights.copy();
+                offspring.nn.layers[i].weights = Matrix.copy(this.nn.layers[i].weights);
             }
 
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].biases = neuralNetwork.nn.layers[i].biases.copy();
+                offspring.nn.layers[i].biases = Matrix.copy(neuralNetwork.nn.layers[i].biases);
             } else {
-                offspring.nn.layers[i].biases = this.nn.layers[i].biases.copy();
+                offspring.nn.layers[i].biases = Matrix.copy(this.nn.layers[i].biases);
             }
         }
         return offspring;

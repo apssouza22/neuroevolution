@@ -1,7 +1,8 @@
 /**
- * Matrix library based on - https://github.com/CodingTrain/Toy-Neural-Network-JS/blob/master/lib/matrix.js
+ * This class provides some basic matrix operations
  */
 class Matrix {
+
     /**
      * Values are initialized to 0
      * @param {number} Rows
@@ -20,165 +21,206 @@ class Matrix {
         }
     }
 
+    /**
+     * Applies matrix multiplication to each element of the matrix(Dot product)
+     *
+     * @param {Matrix | number} n
+     * @returns {Matrix}
+     */
     multiply(n) {
-        if (n instanceof Matrix) { //hadamard multiplication (corresponding element multiplies to this matrix)
-            if (n.rows == this.rows && n.cols == this.cols) {
-                for (let i = 0; i < this.rows; i++) {
-                    for (let j = 0; j < this.cols; j++) {
-                        this.data[i][j] *= n.data[i][j];
-                    }
-                }
-            } else {
-                throw new Error('multiplication failed because of size mismatch!');
-            }
-        } else { //scalar multiply
-            for (let i = 0; i < this.rows; i++) {
-                for (let j = 0; j < this.cols; j++) {
-                    this.data[i][j] *= n;
-                }
-            }
-        }
+        let newMatrix = Matrix.multiply(this, n);
+        this.data = newMatrix.data;
+        this.cols = newMatrix.cols;
+        this.rows = newMatrix.rows;
+        return this;
     }
 
-    static multiply(matx1, matx2) { //returns new matrix ARGS (matrix,matrix) or (matrix,scalar)
-
-        if (matx1.cols == matx2.rows && matx1 instanceof Matrix && matx2 instanceof Matrix) { //actual matrix multiplication
-            let nrows = matx1.rows; //new rows
-            let ncols = matx2.cols; //new cols
-            // let newmat = [];
-            let newmat = new Matrix(matx1.rows, matx2.cols);
-            for (let i = 0; i < nrows; i++) {
-                for (let j = 0; j < ncols; j++) {
-                    newmat.data[i][j] = 0;
-                    for (let k = 0; k < matx1.cols; k++) {
-                        newmat.data[i][j] += matx1.data[i][k] * matx2.data[k][j];
-                    }
+    /**
+     * Applies matrix multiplication to each element of the matrix
+     * (matrix,matrix) or (matrix,scalar)
+     * @param {Matrix} matrix1
+     * @param {Matrix | number} matrix2
+     * @returns {Matrix}
+     */
+    static multiply(matrix1, matrix2) {
+        //scalar multiply
+        if (matrix1 instanceof Matrix && !(matrix2 instanceof Matrix)) {
+            let num = matrix2; //scalar value
+            let newMatrix = Matrix.copy(matrix1);
+            for (let i = 0; i < matrix1.rows; i++) {
+                for (let j = 0; j < matrix1.cols; j++) {
+                    newMatrix.data[i][j] *= num;
                 }
             }
-            return newmat;
+            return newMatrix;
         }
-        if (matx1 instanceof Matrix && !(matx2 instanceof Matrix)) { //scalar multiply
-            let n = matx2; //scalar value
+        if (!(matrix1 instanceof Matrix && matrix2 instanceof Matrix)) {
+            throw new Error('Multiplication failed because no Matrix object found!');
+        }
 
-            //copying matx1 w/o reference
-            let imat = new Matrix(matx1.rows, matx1.cols);
-            for (let i = 0; i < matx1.rows; i++) {
-                for (let j = 0; j < matx1.cols; j++) {
-                    imat.data[i][j] = matx1.data[i][j];
+        if (matrix2.rows == matrix1.rows && matrix2.cols == matrix1.cols) {
+            for (let i = 0; i < matrix1.rows; i++) {
+                for (let j = 0; j < matrix1.cols; j++) {
+                    matrix1.data[i][j] *= matrix2.data[i][j];
                 }
             }
-            //copying - END
+            return matrix1;
+        }
 
-            for (let i = 0; i < matx1.rows; i++) {
-                for (let j = 0; j < matx1.cols; j++) {
-                    imat.data[i][j] *= n;
-                }
-            }
-            return imat;
-        }
-        if (!(matx1.cols == matx2.rows)) {
-            throw new Error('size mismatch!');
-        }
-        if (!(matx1 instanceof Matrix && matx2 instanceof Matrix)) {
-            throw new Error('argument to matrix multiplication func should be only Matrix objects');
-        }
-        console.error("Matrix multiplication failed!");
-        return -1; //product not possible
-
+        return this.calcMatrixProduct(matrix1, matrix2);
     }
 
-    copy() {
-        let newmat = new Matrix(this.rows, this.cols);
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-                newmat.data[i][j] = this.data[i][j];
-            }
+    /**
+     ** Matrix multiplication - cols * rows
+     ** For matrix multiplication, the number of columns in the first matrix must be equal to the number of rows in the second matrix.
+     ** The resulting matrix, known as the matrix product, has the number of rows of the first and the number of columns of the second matrix
+     * @param {Matrix} matrix1
+     * @param {Matrix} matrix2
+     * @returns {Matrix}
+     **/
+    static calcMatrixProduct(matrix1, matrix2) {
+        if (matrix1.cols != matrix2.rows) {
+            throw new Error('multiplication failed because of size mismatch!');
         }
 
-        return newmat;
+        let newMatrix = new Matrix(matrix1.rows, matrix2.cols);
+        for (let i = 0; i < newMatrix.rows; i++) {
+            for (let j = 0; j < newMatrix.cols; j++) {
+                newMatrix.data[i][j] = 0;
+                for (let k = 0; k < matrix1.cols; k++) {
+                    newMatrix.data[i][j] += matrix1.data[i][k] * matrix2.data[k][j];
+                }
+            }
+        }
+        return newMatrix;
     }
 
+    /**
+     * Creates a copy of a matrix
+     * @param {Matrix} matrix
+     * @returns {Matrix}
+     */
+    static copy(matrix) {
+        let newMat = new Matrix(matrix.rows, matrix.cols);
+        for (let i = 0; i < matrix.rows; i++) {
+            for (let j = 0; j < matrix.cols; j++) {
+                newMat.data[i][j] = matrix.data[i][j];
+            }
+        }
+        return newMat;
+    }
+
+    /**
+     * Prints the matrix
+     */
     print() {
         console.table(this.data);
     }
 
-    static transpose(imat) { //returns transposed matrix
-        let transposed = new Matrix(imat.cols, imat.rows);
+    /**
+     * Transposes the matrix
+     * @param matrix
+     * @returns {Matrix}
+     */
+    static transpose(matrix) {
+        let transposed = new Matrix(matrix.cols, matrix.rows);
 
-        for (let i = 0; i < imat.cols; i++) {
-            for (let j = 0; j < imat.rows; j++) {
-                transposed.data[i][j] = imat.data[j][i];
+        for (let i = 0; i < matrix.cols; i++) {
+            for (let j = 0; j < matrix.rows; j++) {
+                transposed.data[i][j] = matrix.data[j][i];
             }
         }
 
         return transposed;
     }
 
-    add(newdata) {
-        if (newdata instanceof Matrix) { //add element wise
-            for (let i = 0; i < this.rows; i++) {
-                for (let j = 0; j < this.cols; j++) {
-                    this.data[i][j] += newdata.data[i][j];
-                }
-            }
-        } else { //add newdata to each element
-            for (let i = 0; i < this.rows; i++) {
-                for (let j = 0; j < this.cols; j++) {
-                    this.data[i][j] += newdata;
-                }
-            }
-        }
-    }
-
-    static add(m1, m2) { //adds n to each element of this matrix or adds 2 matrix (of same dimension) element wise
-        if (m1 instanceof Matrix && m2 instanceof Matrix && m1.rows == m2.rows && m1.cols == m2.cols) {
-            let newmat = new Matrix(m1.rows, m1.cols);
-
-            for (let i = 0; i < m1.rows; i++) {
-                for (let j = 0; j < m1.cols; j++) {
-                    newmat.data[i][j] = m1.data[i][j] + m2.data[i][j];
-                }
-            }
-
-            return newmat;
-        }
-        throw new Error('invalid addition : size mismatch');
-    }
-
-    map(func) { //maps this matrix obj
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-                let val = this.data[i][j];
-                this.data[i][j] = func(val);
-            }
-        }
-    }
-
-    //returns mapped matrix obj
-    static map(matrix, func) {
-        let newmat = new Matrix(matrix.rows, matrix.cols);
-
-        for (let i = 0; i < matrix.rows; i++) {
-            for (let j = 0; j < matrix.cols; j++) {
-                newmat.data[i][j] = func(matrix.data[i][j]);
-            }
-        }
-
-        return newmat;
-    }
-
-    //randomizes this matrix
-    randomize() {
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-                this.data[i][j] = (Math.random() * 2) - 1; //random number between -1 and 1
-            }
-        }
+    /**
+     * Applies addition to each element of the matrix
+     * @param {Matrix| number}matrix
+     */
+    add(matrix) {
+        let newMatrix = Matrix.add(this, matrix);
+        this.data = newMatrix.data;
+        this.cols = newMatrix.cols;
+        this.rows = newMatrix.rows;
+        return this;
     }
 
     /**
-     * takes array of numbers and returns a 1d Matrix object
-     * @param {array} arr - array of numbers
+     * Applies addition to each element of the matrix
+     * @param {Matrix} m1
+     * @param {Matrix|number} m2
+     * @returns {Matrix}
+     */
+    static add(m1, m2) {
+        if (m1 instanceof Matrix && m2 instanceof Matrix) {
+            if (m1.rows != m2.rows || m1.cols != m2.cols) {
+                throw new Error('invalid addition : size mismatch');
+            }
+            let newMatrix = new Matrix(m1.rows, m1.cols);
+            for (let i = 0; i < m1.rows; i++) {
+                for (let j = 0; j < m1.cols; j++) {
+                    newMatrix.data[i][j] = m1.data[i][j] + m2.data[i][j];
+                }
+            }
+            return newMatrix;
+        }
+        //scalar addition
+        for (let i = 0; i < m1.rows; i++) {
+            for (let j = 0; j < m1.cols; j++) {
+                m1.data[i][j] += m2;
+            }
+        }
+        return m1;
+    }
+
+    /**
+     * Applies a function to each element of the matrix
+     * @param {(number)=>{}}func
+     */
+    map(func) {
+        let newMatrix = Matrix.map(this, func);
+        this.data = newMatrix.data;
+        this.cols = newMatrix.cols;
+        this.rows = newMatrix.rows;
+        return this;
+    }
+
+    /**
+     * Applies a function to each element of the matrix
+     * @param {Matrix} matrix
+     * @param {(number)=>{}}func
+     */
+    static map(matrix, func) {
+        let newMatrix = new Matrix(matrix.rows, matrix.cols);
+        for (let i = 0; i < matrix.rows; i++) {
+            for (let j = 0; j < matrix.cols; j++) {
+                newMatrix.data[i][j] = func(matrix.data[i][j]);
+            }
+        }
+        return newMatrix;
+    }
+
+    /**
+     * Create a randomized matrix
+     * @param {number} rows
+     * @param {number} cols
+     * @returns {Matrix}
+     */
+    static randomize(rows, cols) {
+        let newMatrix = new Matrix(rows, cols)
+        for (let i = 0; i < newMatrix.rows; i++) {
+            for (let j = 0; j < newMatrix.cols; j++) {
+                newMatrix.data[i][j] = (Math.random() * 2) - 1; //random number between -1 and 1
+            }
+        }
+        return newMatrix;
+    }
+
+
+    /**
+     * Takes array of numbers and returns a 1d Matrix object
+     * @param {number[]} arr - array of numbers
      */
     static fromArray(arr) {
         let rows = arr.length;
@@ -192,7 +234,10 @@ class Matrix {
         return matrix;
     }
 
-    //gives 1d array (need to update for any dimension of matrix)
+    /**
+     * Return a 1d array of the matrix
+     * @return {number[]}
+     */
     toArray() {
         let arr = [];
         for (let i = 0; i < this.rows; i++) {
