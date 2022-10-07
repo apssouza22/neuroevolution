@@ -55,7 +55,7 @@ class Game {
         this.updateAllRoadCars();
         let gameOver = false
 
-        this.bestCar = this.carPopulation.getSorted()[0];
+        this.bestCar = this.carPopulation.population.sort((a, b) => a.y < b.y ? -1 : 1)[0];
         if (this.restartVerify(this.bestCar.totalCarsOverTaken)){
             return {gameOver: true,score: this.bestCar.calcFitness(),}
         }

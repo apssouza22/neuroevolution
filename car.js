@@ -60,21 +60,10 @@ class Car {
         }
         if (this.sensor) {
             this.sensor.update(roadBorders, traffic);
-            const offsets = this.sensor.readings.map(
-                    s => s == null ? 0 : 1 - s.offset
-            );
-
-            let outputs = this.dna.nn.feedForward(offsets, false);
-            outputs = outputs.map(i => i > 0.5 ? 1 : 0)
-
-            if (this.useBrain) {
-                this.controls.forward = outputs[0];
-                this.controls.left = outputs[1];
-                this.controls.right = outputs[2];
-                this.controls.reverse = outputs[3];
-            }
+            this.controls.update(this)
         }
     }
+
 
     /**
      * Calculates how good the car performed on the road
