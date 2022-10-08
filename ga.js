@@ -13,7 +13,7 @@ class GeneticEvolution {
      * Select the best cars from the population (elitism)
      */
     select() {
-        const bestCars = this.populationHandler.getSorted();
+        const bestCars = this.populationHandler.sortByFitness();
         return [bestCars[0], bestCars[1]];
     }
 
@@ -134,6 +134,7 @@ class DNA {
     }
 }
 
+// class responsible for handle the car population
 class CarPopulation {
     constructor(count = 100) {
         this.count = count;
@@ -146,9 +147,8 @@ class CarPopulation {
         }
     }
 
-    getSorted() {
-        this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
-        return this.population;
+    sortByFitness() {
+        return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
     }
 
     get() {

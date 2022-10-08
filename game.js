@@ -27,7 +27,7 @@ class Game {
         this.traffic = this.getTraffic();
         this.totalCarsOvertaken = 0;
         this.totalFramesWithoutOvertaking = 0;
-        this.bestCar = this.carPopulation.getSorted()[0];
+        this.bestCar = this.carPopulation.sortByFitness()[0];
         console.log("Initializing game generation " + this.generationCounts);
     }
 

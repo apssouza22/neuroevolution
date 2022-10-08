@@ -1,4 +1,6 @@
+// Class responsible for handling the car direction
 class Controls {
+
     constructor(type) {
         this.forward = false;
         this.left = false;
