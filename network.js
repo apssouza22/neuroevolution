@@ -13,7 +13,7 @@ class NeuralNetwork {
     }
 
     /**
-     * Load the pre trained weights from a JSON object
+     * Load the pre-trained weights from a JSON object
      * @param {NeuralNetwork} dict
      * @returns {NeuralNetwork}
      */
@@ -56,7 +56,7 @@ class NeuralNetwork {
         this.#feedforwardArgsValidator(input_array)
         let inputMat = Matrix.fromArray(input_array)
         let outputs = [];
-        for (let i = 0; i < this.layerNodesCounts.length; i++) {
+        for (let i = 0; i < this.layers.length; i++) {
             outputs[i] = this.layers[i].feedForward(inputMat);
             inputMat = outputs[i];
         }
@@ -96,7 +96,7 @@ class NeuralNetwork {
 
     // Argument validator functions
     #feedforwardArgsValidator(input_array) {
-        if (input_array.length != this.layerNodesCounts[0]) {
+        if (input_array.length != this.layers[0].outputs.rows) {
             throw new Error("Feedforward failed : Input array and input layer size doesn't match.");
         }
     }

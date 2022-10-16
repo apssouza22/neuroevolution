@@ -120,9 +120,9 @@ class DNA {
 
     #crossoverValidator(network) {
         if (this instanceof DNA) {
-            if (network.nn.layerNodesCounts.length == this.nn.layerNodesCounts.length) {
-                for (let i = 0; i < network.nn.layerNodesCounts.length; i++) {
-                    if (network.nn.layerNodesCounts[i] != this.nn.layerNodesCounts[i]) {
+            if (network.nn.layers.length == this.nn.layers.length) {
+                for (let i = 0; i < network.nn.layers.length; i++) {
+                    if (network.nn.layers[i].outputs.rows != this.nn.layers[i].outputs.rows) {
                         throw new Error("Crossover networks must have the same layer nodes counts");
                     }
                 }
