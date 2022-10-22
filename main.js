@@ -45,7 +45,7 @@ function trainGeneticAlgo(time) {
         for (let i = 0; i < gameStepFrameCount; i++) {
             let {gameOver,} = game.playStep(time);
             if (!gameOver) {
-                networkVisualizer.updateNetwork(time, game.bestCar.dna);
+                networkVisualizer.updateNetwork(time, game.bestCar.dna.nn);
             }
         }
         requestAnimationFrame(animate);

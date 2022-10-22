@@ -55,7 +55,7 @@ class DNA {
     }
 
     /**
-     * Load the pre trained weights(DNA) from a JSON object
+     * Load the pre-trained weights(DNA) from a JSON object
      * @param {NeuralNetwork} dict
      * @returns {NeuralNetwork}
      */
@@ -151,6 +151,10 @@ class CarPopulation {
         return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
     }
 
+    /**
+     * Get the population
+     * @returns {Car[]}
+     */
     get() {
         return this.population;
     }
