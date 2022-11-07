@@ -15,7 +15,6 @@ class Game {
         this.carCtx = this.carCanvas.getContext("2d");
         this.road = new Road(this.carCanvas.width / 2, this.carCanvas.width * 0.9);
         this.generationCounts = 0;
-        this.evolution = new GeneticEvolution(populationCount, 0.1);
         this.init();
     }
 

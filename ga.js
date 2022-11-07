@@ -13,8 +13,8 @@ class GeneticEvolution {
      * Select the best cars from the population (elitism)
      */
     select() {
-        const bestCars = this.populationHandler.sortByFitness();
-        return [bestCars[0], bestCars[1]];
+        const bests = this.populationHandler.sortByFitness();
+        return [bests[0], bests[1]];
     }
 
     /**

@@ -3,17 +3,17 @@ let gameStepFrameCount = 1;
 const networkVisualizer = new NetworkVisualizer(document.getElementById("networkCanvas"));
 let chart = getChart()
 const game = new Game(
-        document.getElementById("carCanvas"),
-        new CarPopulation(populationCount),
-        (game) => {
-    chart.data.labels.push(game.generationCounts);
-    const [mom, dad] = game.evolution.select();
-    console.log(mom.totalCarsOverTaken)
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(mom.totalCarsOverTaken);
+    document.getElementById("carCanvas"),
+    new CarPopulation(populationCount),
+    (game) => {
+        chart.data.labels.push(game.generationCounts);
+        const [mom, dad] = game.evolution.select();
+        console.log(mom.totalCarsOverTaken)
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(mom.totalCarsOverTaken);
+        });
+        chart.update();
     });
-    chart.update();
-});
 trainGeneticAlgo();
 
 function updateFrameLoop(input) {
