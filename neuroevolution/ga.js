@@ -96,6 +96,9 @@ class PopulationHandler {
         this.population = population;
     }
 
+    /**
+     * Reset the population state
+     */
     reset() {
         for (const p of this.population) {
             p.fitness = 0;
@@ -109,6 +112,10 @@ class PopulationHandler {
         return this.population;
     }
 
+    /**
+     * Add the new population to the handler
+     * @param {PopulationItem[]}population
+     */
     addPopulation(population) {
         this.population = population;
     }

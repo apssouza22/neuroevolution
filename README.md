@@ -19,8 +19,8 @@ The project is developed from scratch and with no external libraries.
 We have made the NeuroEvolution framework totally independent of the game this way we can use it in any game we want.
 The framework is in the `neuroevolution` folder. The framework is composed of 3 main classes:
 - `NeuralNetwork`: This class represents the required Artificial Neural network.
-- `GeneticEvolution`: This class represents the Genetic Algorithm.
-- `PopulationHandler`: This class represents the population.
+- `GeneticEvolution`: This class represents the Genetic Evolution Algorithm.
+- `PopulationHandler`: This class represents the genetic population.
 
 ```
 let population = [new PopulationItem(), new PopulationItem()]
@@ -30,6 +30,9 @@ geneticEvolution.loadDna(); // load DNAs from local storage if available
 geneticEvolution.evolve(); // evolve the population based on the fitness function
 geneticEvolution.saveDna(); // save the DNAs to local storage
 ```
+
+`PopulationItem` and `PopulationHandler` are classes that you need to implement in your game. See the `Car` and `CarPopulation` for an example.
+
 
 ### If this project helped you, consider leaving a star  and by me a coffee
 <a href="https://www.buymeacoffee.com/apssouza"><img src="https://miro.medium.com/max/654/1*rQv8JgstmK0juxP-Kb4IGg.jpeg"></a>
