@@ -1,7 +1,7 @@
 // Class responsible for handle the genetic evolution of the population
 class GeneticEvolution {
     /**
-     * @param {CarPopulation} populationHandler
+     * @param {PopulationHandler} populationHandler
      * @param {number}m
      */
     constructor(populationHandler, m) {
@@ -10,7 +10,7 @@ class GeneticEvolution {
     }
 
     /**
-     * Select the best cars from the population (elitism)
+     * Select the best item from the population (elitism)
      */
     select() {
         const bests = this.populationHandler.sortByFitness();
@@ -18,12 +18,12 @@ class GeneticEvolution {
     }
 
     /**
-     * Create a new generation of cars
-     * @param {Car} mom
-     * @param {Car} dad
+     * Create a new generation of items
+     * @param {PopulationItem} mom
+     * @param {PopulationItem} dad
      */
     reproduce(mom, dad) {
-        for (const p of this.populationHandler.get()) {
+        for (const p of this.populationHandler.getPopulation()) {
             if (p === mom || p === dad) {
                 continue;
             }
@@ -46,6 +46,53 @@ class GeneticEvolution {
         }
     }
 }
+
+
+class PopulationHandler {
+    /**
+     * @param {PopulationItem[]}
+     */
+    constructor(population) {
+        this.population = population;
+    }
+
+    /**
+     * @returns {PopulationItem[]}
+     */
+    getPopulation() {
+        return this.population;
+    }
+
+    /**
+     * @returns {PopulationItem[]}
+     */
+    sortByFitness() {
+        return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
+    }
+}
+
+/**
+ * Item in the population
+ */
+class PopulationItem {
+    /**
+     * @type {DNA}
+     */
+    dna;
+    /**
+     * @type {number}
+     */
+    fitness;
+
+    /**
+     * Calculates the fitness of the item
+     * @returns {number}
+     */
+    calcFitness() {
+        return this.fitness
+    }
+}
+
 
 // Class responsible for performing the genetic operations
 class DNA {
@@ -135,10 +182,12 @@ class DNA {
 }
 
 // class responsible for handle the car population
-class CarPopulation {
+class CarPopulation extends PopulationHandler {
     constructor(count = 100) {
+        let population = []
+        super(population);
         this.count = count;
-        this.population = [];
+        this.population = population;
     }
 
     generateCars(x) {

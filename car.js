@@ -1,5 +1,6 @@
-class Car {
+class Car extends PopulationItem{
     constructor(x, y, width, height, controlType, maxSpeed = 3, color = "blue") {
+        super();
         this.x = x;
         this.y = y;
         this.width = width;
@@ -66,6 +67,7 @@ class Car {
 
 
     /**
+     * @override {PopulationItem.calcFitness}
      * Calculates how good the car performed on the road
      */
     calcFitness() {
