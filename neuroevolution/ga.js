@@ -151,11 +151,23 @@ class PopulationItem {
 }
 
 
-// Class responsible for performing the genetic operations
+/**
+ * Class responsible for handle the DNA of the population
+ */
 class DNA {
 
     constructor(layer_nodes_counts) {
         this.nn = new NeuralNetwork(layer_nodes_counts);
+    }
+
+    /**
+     * Use genes to predict the output for the given input
+     * @param inputs
+     * @returns {(number)[]}
+     */
+    useGenes(inputs) {
+        let outputs = this.nn.feedForward(inputs, false);
+        return outputs.map(i => i > 0.5 ? 1 : 0)
     }
 
     /**

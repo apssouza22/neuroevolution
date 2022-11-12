@@ -15,7 +15,7 @@ The project is developed from scratch and with no external libraries.
 
 ![Alt text](nn.png?raw=true "Self driving car")
 
-## NeuroEvolution Framework
+## NeuroEvolution library
 We have made the NeuroEvolution framework totally independent of the game this way we can use it in any game we want.
 The framework is in the `neuroevolution` folder. The framework is composed of 3 main classes:
 - `NeuralNetwork`: This class represents the required Artificial Neural network.
@@ -31,11 +31,21 @@ geneticEvolution.evolve(); // evolve the population based on the fitness functio
 geneticEvolution.saveDna(); // save the DNAs to local storage
 ```
 
-`PopulationItem` and `PopulationHandler` are classes that you need to implement in your game. See the `Car` and `CarPopulation` for an example.
+`PopulationItem` and `PopulationHandler` are classes that you need to implement in your game. 
+See the [Car](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L1) and [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L176) for an example.
+
+
+You can use the population genes to play the game. See the [Car.steer](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L71) for an example.
+```
+geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
+    let output = item.useGenome(input);
+    log(output);
+});
+```
 
 
 ### If this project helped you, consider leaving a star  and by me a coffee
 <a href="https://www.buymeacoffee.com/apssouza"><img src="https://miro.medium.com/max/654/1*rQv8JgstmK0juxP-Kb4IGg.jpeg"></a>
 
-
-This project is heavily inspired by [this](https://www.youtube.com/watch?v=NkI9ia2cLhc&list=PLB0Tybl0UNfYoJE7ZwsBQoDIG4YN9ptyY) course.
+---
+This project is highly inspired by [this](https://github.com/gniziemazity/Self-driving-car) other project.

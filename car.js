@@ -61,8 +61,26 @@ class Car extends PopulationItem{
         }
         if (this.sensor) {
             this.sensor.update(roadBorders, traffic);
-            this.controls.update(this)
+            this.steer();
         }
+    }
+
+    /**
+     * Use brain to find the best direction
+     */
+    steer() {
+        if (!this.useBrain) {
+            return
+        }
+        const offsets = this.sensor.readings.map(
+                s => s == null ? 0 : 1 - s.offset
+        );
+        let outputs = this.dna.useGenes(offsets);
+
+        this.controls.forward = outputs[0];
+        this.controls.left = outputs[1];
+        this.controls.right = outputs[2];
+        this.controls.reverse = outputs[3];
     }
 
 
