@@ -2,18 +2,29 @@ let populationCount = 500;
 let gameStepFrameCount = 1;
 const networkVisualizer = new NetworkVisualizer(document.getElementById("networkCanvas"));
 let chart = getChart()
-const game = new Game(
-    document.getElementById("carCanvas"),
-    new CarPopulation(populationCount),
-    (game) => {
-        chart.data.labels.push(game.generationCounts);
-        const [mom, dad] = game.evolution.select();
-        console.log(mom.totalCarsOverTaken)
-        chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(mom.totalCarsOverTaken);
-        });
-        chart.update();
-    });
+let game = null;
+
+function startGame() {
+    let geneticEvolution = new GeneticEvolution(new CarPopulation(populationCount), 0.1);
+    geneticEvolution.loadDna();
+
+    game = new Game(
+            document.getElementById("carCanvas"),
+            geneticEvolution,
+            (game) => {
+                chart.data.labels.push(geneticEvolution.generation);
+                /**
+                 * @type {Car}
+                 */
+                const [mom, _] = game.evolution.select();
+                console.log(mom.totalCarsOverTaken)
+                chart.data.datasets.forEach((dataset) => {
+                    dataset.data.push(mom.totalCarsOverTaken);
+                });
+                chart.update();
+            });
+}
+
 trainGeneticAlgo();
 
 function updateFrameLoop(input) {
@@ -23,15 +34,13 @@ function updateFrameLoop(input) {
 function updatePopulation(input) {
     populationCount = input.value == "" ? 500 : parseInt(input.value);
     populationCount = populationCount < 2 ? 2 : populationCount;
-    game.evolution = new GeneticEvolution(populationCount, 0.1);
-    game.init();
+    startGame();
 }
 
 function save(e) {
     const [mom, dad] = game.evolution.select();
     if (mom.totalCarsOverTaken > 0 || e) {
-        mom.dna.saveDNA("momBrain");
-        dad.dna.saveDNA("dadBrain");
+        game.evolution.saveDna();
     }
 }
 
@@ -41,6 +50,7 @@ function discard() {
 }
 
 function trainGeneticAlgo(time) {
+    startGame();
     function animate(time) {
         for (let i = 0; i < gameStepFrameCount; i++) {
             let {gameOver,} = game.playStep(time);

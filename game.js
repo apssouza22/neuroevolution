@@ -4,30 +4,30 @@ class Game {
     /**
      * Constructor
      * @param canvas
-     * @param {CarPopulation} carPopulation
+     * @param {GeneticEvolution} geneticEvolution
      * @param {(Game)=>{}}onGenerationEnd callback function for when a generation ends
      */
-    constructor(canvas, carPopulation, onGenerationEnd) {
+    constructor(canvas, geneticEvolution, onGenerationEnd) {
         this.carCanvas = canvas
         this.onGenerationEnd = onGenerationEnd;
-        this.carPopulation = carPopulation;
+        this.evolution = geneticEvolution;
         this.carCanvas.width = 200;
         this.carCtx = this.carCanvas.getContext("2d");
         this.road = new Road(this.carCanvas.width / 2, this.carCanvas.width * 0.9);
-        this.generationCounts = 0;
+        /**
+         * @type {CarPopulation}
+         */
+        this.carPopulation = this.evolution.getPopulationHandler();
+        this.carPopulation.addRoad(this.road);
         this.init();
     }
 
     init() {
-        this.generationCounts++;
-        this.carPopulation.generateCars(this.road.getLaneCenter(1));
-        this.evolution = new GeneticEvolution(this.carPopulation, 0.1);
-        this.evolution.loadDna();
+        this.evolution.evolve();
         this.traffic = this.getTraffic();
         this.totalCarsOvertaken = 0;
         this.totalFramesWithoutOvertaking = 0;
         this.bestCar = this.carPopulation.sortByFitness()[0];
-        console.log("Initializing game generation " + this.generationCounts);
     }
 
 

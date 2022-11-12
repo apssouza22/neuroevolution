@@ -1,12 +1,37 @@
 // Class responsible for handle the genetic evolution of the population
 class GeneticEvolution {
     /**
-     * @param {PopulationHandler} populationHandler
-     * @param {number}m
+     * @type {number}
      */
-    constructor(populationHandler, m) {
+    generation = 0;
+
+    /**
+     * @param {PopulationHandler} populationHandler
+     * @param {number}m Mutation rate 0-1
+     */
+    constructor(populationHandler, m = 0.1) {
         this.populationHandler = populationHandler;
-        this.mutationRate = m; // Mutation rate 0-1
+        this.mutationRate = m;
+    }
+
+    /**
+     * Create a new generation of items with the bests from the previous generation
+     */
+    evolve() {
+        const [mom, dad] = this.select();
+        const children = this.reproduce(mom, dad);
+        this.populationHandler.addPopulation(children);
+        this.populationHandler.reset();
+        this.generation++;
+        console.log("New generation " + this.generation);
+    }
+
+    /**
+     * Get population handler
+     * @returns {PopulationHandler}
+     */
+    getPopulationHandler() {
+        return this.populationHandler;
     }
 
     /**
@@ -21,8 +46,10 @@ class GeneticEvolution {
      * Create a new generation of items
      * @param {PopulationItem} mom
      * @param {PopulationItem} dad
+     * @returns {PopulationItem[]} children
      */
     reproduce(mom, dad) {
+        let children = [];
         for (const p of this.populationHandler.getPopulation()) {
             if (p === mom || p === dad) {
                 continue;
@@ -32,9 +59,14 @@ class GeneticEvolution {
             let childDna = momDna.crossover(dadDna);
             childDna.mutate(this.mutationRate);
             p.dna = childDna
+            children.push(p);
         }
+        return children;
     }
 
+    /**
+     * Load an existing DNA from the local storage
+     */
     loadDna() {
         if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
             console.log("Loading DNA from local storage");
@@ -42,18 +74,32 @@ class GeneticEvolution {
             const [mom, dad] = this.select();
             mom.dna.loadDna(JSON.parse(localStorage.getItem("momBrain")));
             dad.dna.loadDna(JSON.parse(localStorage.getItem("dadBrain")));
-            this.reproduce(mom, dad);
         }
+    }
+
+    /**
+     * Save the best DNAs to the local storage
+     */
+    saveDna() {
+        const [mom, dad] = this.select();
+        mom.dna.saveDNA("momBrain");
+        dad.dna.saveDNA("dadBrain");
     }
 }
 
 
 class PopulationHandler {
     /**
-     * @param {PopulationItem[]}
+     * @param {PopulationItem[]}population
      */
     constructor(population) {
         this.population = population;
+    }
+
+    reset() {
+        for (const p of this.population) {
+            p.fitness = 0;
+        }
     }
 
     /**
@@ -61,6 +107,10 @@ class PopulationHandler {
      */
     getPopulation() {
         return this.population;
+    }
+
+    addPopulation(population) {
+        this.population = population;
     }
 
     /**
@@ -181,38 +231,3 @@ class DNA {
     }
 }
 
-// class responsible for handle the car population
-class CarPopulation extends PopulationHandler {
-    constructor(count = 100) {
-        let population = []
-        super(population);
-        this.count = count;
-        this.population = population;
-    }
-
-    generateCars(x) {
-        for (let i = 0; i < this.count; i++) {
-            this.population[i] = new Car(x, 100, 30, 50, "AI");
-        }
-    }
-
-    sortByFitness() {
-        return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
-    }
-
-    /**
-     * Get the population
-     * @returns {Car[]}
-     */
-    get() {
-        return this.population;
-    }
-
-    /**
-     * Check if anyone in population is alive
-     * @return {boolean}
-     */
-    hasAlive() {
-        return this.population.filter(car => !car.damaged).length == 0;
-    }
-}

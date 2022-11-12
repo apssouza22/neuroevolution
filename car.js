@@ -152,3 +152,59 @@ class Car extends PopulationItem{
 
     }
 }
+
+
+// class responsible for handle the car population
+class CarPopulation extends PopulationHandler {
+    constructor(count = 100) {
+        let population = new Array(count);
+        super(population);
+        this.count = count;
+        this.generateCars(0);
+        this.population = population;
+    }
+
+    /**
+     * Add game road
+     * @param {Road}road
+     */
+    addRoad(road) {
+        this.road = road;
+    }
+
+    reset() {
+        for (const pop of this.population) {
+            pop.fitness = 0;
+            pop.x = this.road.getLaneCenter(1);
+            pop.y = 100;
+            pop.damaged = false;
+        }
+        console.log("Resetting population");
+    }
+
+    generateCars(x) {
+        for (let i = 0; i < this.count; i++) {
+            this.population[i] = new Car(x, 100, 30, 50, "AI");
+        }
+    }
+
+    sortByFitness() {
+        return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
+    }
+
+    /**
+     * Get the population
+     * @returns {Car[]}
+     */
+    get() {
+        return this.population;
+    }
+
+    /**
+     * Check if anyone in population is alive
+     * @return {boolean}
+     */
+    hasAlive() {
+        return this.population.filter(car => !car.damaged).length == 0;
+    }
+}
