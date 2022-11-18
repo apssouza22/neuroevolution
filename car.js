@@ -19,7 +19,7 @@ class Car extends PopulationItem{
 
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this);
-            this.dna = new DNA([this.sensor.rayCount, 6, 4, 4]);
+            this.genetics = new Genetics([this.sensor.rayCount, 6, 4, 4]);
         }
         this.controls = new Controls(controlType);
 
@@ -75,7 +75,7 @@ class Car extends PopulationItem{
         const offsets = this.sensor.readings.map(
                 s => s == null ? 0 : 1 - s.offset
         );
-        let outputs = this.dna.useGenes(offsets);
+        let outputs = this.genetics.useGenes(offsets);
 
         this.controls.forward = outputs[0];
         this.controls.left = outputs[1];

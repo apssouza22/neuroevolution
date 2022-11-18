@@ -54,11 +54,11 @@ class GeneticEvolution {
             if (p === mom || p === dad) {
                 continue;
             }
-            let momDna = mom.dna;
-            let dadDna = dad.dna;
+            let momDna = mom.genetics;
+            let dadDna = dad.genetics;
             let childDna = momDna.crossover(dadDna);
             childDna.mutate(this.mutationRate);
-            p.dna = childDna
+            p.genetics = childDna
             children.push(p);
         }
         return children;
@@ -67,23 +67,23 @@ class GeneticEvolution {
     /**
      * Load an existing DNA from the local storage
      */
-    loadDna() {
+    loadGenetics() {
         if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
-            console.log("Loading DNA from local storage");
+            console.log("Loading Genetics from local storage");
 
             const [mom, dad] = this.select();
-            mom.dna.loadDna(JSON.parse(localStorage.getItem("momBrain")));
-            dad.dna.loadDna(JSON.parse(localStorage.getItem("dadBrain")));
+            mom.genetics.loadGenetics(JSON.parse(localStorage.getItem("momBrain")));
+            dad.genetics.loadGenetics(JSON.parse(localStorage.getItem("dadBrain")));
         }
     }
 
     /**
-     * Save the best DNAs to the local storage
+     * Save the best Genetics to the local storage
      */
-    saveDna() {
+    saveGenetics() {
         const [mom, dad] = this.select();
-        mom.dna.saveDNA("momBrain");
-        dad.dna.saveDNA("dadBrain");
+        mom.genetics.saveGenetics("momBrain");
+        dad.genetics.saveGenetics("dadBrain");
     }
 }
 
@@ -133,9 +133,9 @@ class PopulationHandler {
  */
 class PopulationItem {
     /**
-     * @type {DNA}
+     * @type {Genetics}
      */
-    dna;
+    genetics;
     /**
      * @type {number}
      */
@@ -152,9 +152,9 @@ class PopulationItem {
 
 
 /**
- * Class responsible for handle the DNA of the population
+ * Class responsible for handle the Genetics of the population
  */
-class DNA {
+class Genetics {
 
     constructor(layer_nodes_counts) {
         this.nn = new NeuralNetwork(layer_nodes_counts);
@@ -171,19 +171,19 @@ class DNA {
     }
 
     /**
-     * Load the pre-trained weights(DNA) from a JSON object
+     * Load the pre-trained weights(Genetics) from a JSON object
      * @param {NeuralNetwork} dict
      * @returns {NeuralNetwork}
      */
-    loadDna(dict) {
+    loadGenetics(dict) {
         this.nn.loadWeights(dict);
     }
 
     /**
-     * Save DNA to local storage
+     * Save Genetics to local storage
      * @param {String} key - the local storage key to save the model weights to
      */
-    saveDNA(key = "brain") {
+    saveGenetics(key = "brain") {
         this.nn.save(key);
     }
 
@@ -212,20 +212,20 @@ class DNA {
 
     /**
      * Mutate by crossing two neural networks
-     * @param {DNA} neuralNetwork - crossover partner
+     * @param {Genetics} genetics - crossover partner
      */
-    crossover(neuralNetwork) {
-        this.#crossoverValidator(neuralNetwork);
-        const offspring = new DNA(neuralNetwork.nn.layerNodesCounts);
-        for (let i = 0; i < neuralNetwork.nn.layers.length; i++) {
+    crossover(genetics) {
+        this.#crossoverValidator(genetics);
+        const offspring = new Genetics(genetics.nn.layerNodesCounts);
+        for (let i = 0; i < genetics.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].weights = Matrix.copy(neuralNetwork.nn.layers[i].weights);
+                offspring.nn.layers[i].weights = Matrix.copy(genetics.nn.layers[i].weights);
             } else {
                 offspring.nn.layers[i].weights = Matrix.copy(this.nn.layers[i].weights);
             }
 
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].biases = Matrix.copy(neuralNetwork.nn.layers[i].biases);
+                offspring.nn.layers[i].biases = Matrix.copy(genetics.nn.layers[i].biases);
             } else {
                 offspring.nn.layers[i].biases = Matrix.copy(this.nn.layers[i].biases);
             }
@@ -234,11 +234,16 @@ class DNA {
     }
 
 
-    #crossoverValidator(network) {
-        if (this instanceof DNA) {
-            if (network.nn.layers.length == this.nn.layers.length) {
-                for (let i = 0; i < network.nn.layers.length; i++) {
-                    if (network.nn.layers[i].outputs.rows != this.nn.layers[i].outputs.rows) {
+    /**
+     * Validate the genetics to be used in crossover
+     * @param {Genetics} genetics
+     * @returns {boolean}
+     */
+    #crossoverValidator(genetics) {
+        if (this instanceof Genetics) {
+            if (genetics.nn.layers.length == this.nn.layers.length) {
+                for (let i = 0; i < genetics.nn.layers.length; i++) {
+                    if (genetics.nn.layers[i].outputs.rows != this.nn.layers[i].outputs.rows) {
                         throw new Error("Crossover networks must have the same layer nodes counts");
                     }
                 }
@@ -246,7 +251,7 @@ class DNA {
             }
             throw new Error("Crossover networks must have the same layer counts");
         }
-        throw new Error("Crossover networks must be of type NeuralNetworkMutable");
+        throw new Error("Crossover networks must be of type Genetics");
     }
 }
 

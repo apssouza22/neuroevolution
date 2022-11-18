@@ -6,7 +6,7 @@ let game = null;
 
 function startGame() {
     let geneticEvolution = new GeneticEvolution(new CarPopulation(populationCount), 0.1);
-    geneticEvolution.loadDna();
+    geneticEvolution.loadGenetics();
 
     game = new Game(
             document.getElementById("carCanvas"),
@@ -40,7 +40,7 @@ function updatePopulation(input) {
 function save(e) {
     const [mom, dad] = game.evolution.select();
     if (mom.totalCarsOverTaken > 0 || e) {
-        game.evolution.saveDna();
+        game.evolution.saveGenetics();
     }
 }
 
@@ -55,7 +55,7 @@ function trainGeneticAlgo(time) {
         for (let i = 0; i < gameStepFrameCount; i++) {
             let {gameOver,} = game.playStep(time);
             if (!gameOver) {
-                networkVisualizer.updateNetwork(time, game.bestCar.dna.nn);
+                networkVisualizer.updateNetwork(time, game.bestCar.genetics.nn);
             }
         }
         requestAnimationFrame(animate);
