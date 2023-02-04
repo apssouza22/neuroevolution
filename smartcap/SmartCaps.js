@@ -19,6 +19,28 @@ class SmartCaps extends Capsule{
         this.sensors.line.color = "grey"
         this.sensorValues = []
     }
+    // keyControl(){
+    //     this.capsule.keyControl()
+    // }
+    //
+    // setPosition(x, y, a = this.angle){
+    //     this.capsule.setPosition(x,y,a)
+    // }
+    //
+    // reposition(){
+    //     this.capsule.reposition()
+    // }
+    //
+    // render(){
+    //     this.capsule.render()
+    // }
+    //
+    // setColor(color){
+    //     this.capsule.setColor(color)
+    // }
+    // remove(){
+    //     this.capsule.remove()
+    // }
 
     // iterating through the brain array and changing the acceleration accordingly
     makeMove(){
@@ -26,7 +48,7 @@ class SmartCaps extends Capsule{
         this.right = false;
         this.up = false;
         this.down = false;
-    
+
         if(this.brain.oOutputValues[0] === 1){
             this.left = true
         }
@@ -47,7 +69,7 @@ class SmartCaps extends Capsule{
     }
 
     // counting the checklines crossed
-    getReward(){
+    getReward(checkLines){
         if(collide(this, checkLines[this.reward % checkLines.length])){
             this.reward++
         }
@@ -67,8 +89,8 @@ class SmartCaps extends Capsule{
             wallArray.forEach(wall => {
                 let intersection = lineSegmentIntersection(
                     this.sensors.line.vertex[0], closestPoint, wall.start, wall.end)
-                if(intersection && 
-                    intersection.subtr(this.sensors.start).mag() < 
+                if(intersection &&
+                    intersection.subtr(this.sensors.start).mag() <
                     closestPoint.subtr(this.sensors.start).mag()){
                         closestPoint = intersection
                         this.sensors.line.color = "red"

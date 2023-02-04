@@ -5,45 +5,6 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 canvas.focus();
 
-let raceWalls = []
-raceWalls.push(new Wall(240,120,120,120))
-raceWalls.push(new Wall(120,120,120,360))
-raceWalls.push(new Wall(120,360,480,360))
-raceWalls.push(new Wall(480,360,480,120))
-raceWalls.push(new Wall(360,0,360,240))
-raceWalls.push(new Wall(360,240,240,240))
-raceWalls.push(new Wall(0,0,640,0))
-raceWalls.push(new Wall(640,0,640,480))
-raceWalls.push(new Wall(640,480,0,480))
-raceWalls.push(new Wall(0,480,0,0))
-raceWalls.push(new Wall(600,0,600,480))
-
-let checkLines = []
-checkLines.push(new Wall(10,360,110,360))
-checkLines.push(new Wall(10,240,110,240))
-checkLines.push(new Wall(10,120,110,120))
-checkLines.push(new Wall(120,10,120,110))
-checkLines.push(new Wall(240,10,240,110))
-checkLines.push(new Wall(250,120,350,120))
-checkLines.push(new Wall(240,130,240,230))
-checkLines.push(new Wall(130,240,230,240))
-checkLines.push(new Wall(240,250,240,350))
-checkLines.push(new Wall(360,250,360,350))
-checkLines.push(new Wall(370,240,470,240))
-checkLines.push(new Wall(370,120,470,120))
-checkLines.push(new Wall(480,10,480,110))
-checkLines.push(new Wall(490,120,590,120))
-checkLines.push(new Wall(490,240,590,240))
-checkLines.push(new Wall(490,360,590,360))
-checkLines.push(new Wall(480,370,480,470))
-checkLines.push(new Wall(360,370,360,470))
-checkLines.push(new Wall(240,370,240,470))
-checkLines.push(new Wall(120,370,120,470))
-checkLines.forEach(line => {
-    line.layer = -2
-    line.setColor("#ffaacc")
-})
-
 let counter = 0
 let stepCounter = 0
 let smartCapsPop = new SmartCapsPop(20)
@@ -76,20 +37,20 @@ function nextGeneration() {
 nextGenButton.onclick = () => {
     nextGeneration();
 }
-
+road = getRoad()
 // STEP 2: defining the game logic
 function gameLogic(){
     if(capsAreMoving){
         if(counter % 3 === 0){
             smartCapsPop.caps.forEach(caps => {
                 if(stepCounter < 300){
-                    caps.brain.setInputValues(caps.getSensorData(raceWalls))
+                    caps.brain.setInputValues(caps.getSensorData(road.walls))
                     caps.brain.feedForward()
                     caps.makeMove()
                 } else {
                     caps.stop()
                 }
-                caps.getReward()
+                caps.getReward(road.checkLines)
             })
             if(smartCapsPop.velocitySum() < 0.01 && stepCounter > 0){
                 starterButton.disabled = false
@@ -99,12 +60,15 @@ function gameLogic(){
                 smartCapsPop.createNextGen()
                 genDataField.innerHTML += `<br/>Gen ${smartCapsPop.generation} - Avg dist: ${Math.floor(smartCapsPop.fitnessSum() / smartCapsPop.popSize)}`
                 nextGenButton.textContent = `Launch Generation ${smartCapsPop.generation+1}`
-                // nextGeneration();
+
             }
             stepCounter++
             counter = 0
         }
         counter++
+    }
+    if(!nextGenButton.disabled){
+        // nextGeneration();
     }
     smartCapsPop.caps.forEach(caps => {
         ctx.fillStyle = "white"
@@ -112,5 +76,30 @@ function gameLogic(){
     })
 }
 
-// STEP 3: handling the user input and the game loop
-requestAnimationFrame(mainLoop);
+const gameStepFrameCount=1
+trainGeneticAlgo(0)
+function trainGeneticAlgo(time) {
+    // startGame();
+    function animate(time) {
+        for (let i = 0; i < gameStepFrameCount; i++) {
+            userInteraction();
+            physicsLoop();
+            renderLoop();
+            gameLogic();
+        }
+        requestAnimationFrame(animate);
+    }
+
+    animate(time)
+}
+
+function startGame() {
+    let geneticEvolution = new GeneticEvolution(new CarPopulation(populationCount), 0.1);
+    geneticEvolution.loadGenetics();
+
+    game = new CapsGame(
+        document.getElementById("canvas"),
+        geneticEvolution,
+        (game) => {
+        });
+}

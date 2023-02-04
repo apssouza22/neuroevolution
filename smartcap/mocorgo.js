@@ -5,8 +5,8 @@ class Vector{
     constructor(x, y){
         this.x = x;
         this.y = y;
-    }  
-   
+    }
+
     set(x, y){
         this.x = x;
         this.y = y;
@@ -48,7 +48,7 @@ class Vector{
         ctx.stroke();
         ctx.closePath();
     }
-    
+
     static dot(v1, v2){
         return v1.x*v2.x + v1.y*v2.y;
     }
@@ -286,47 +286,6 @@ class Body{
     }
 }
 
-class Ball extends Body{
-    constructor(x, y, r, m){
-        super();
-        this.pos = new Vector(x, y);
-        this.comp = [new Circle(x, y, r)];
-        this.m = m;
-        if (this.m === 0){
-            this.inv_m = 0;
-        } else {
-            this.inv_m = 1 / this.m;
-        }
-    }
-
-    setPosition(x, y, a = this.angle){
-        this.pos.set(x, y);
-        this.comp[0].pos = this.pos;
-    }
-
-    reposition(){
-        super.reposition();
-        this.setPosition(this.pos.add(this.vel).x, this.pos.add(this.vel).y);
-    }
-
-    keyControl(){
-        this.acc.x = 0
-        this.acc.y = 0
-        if(this.left){
-            this.acc.x -= this.keyForce;
-        }
-        if(this.up){
-            this.acc.y -= this.keyForce;
-        }
-        if(this.right){
-            this.acc.x += this.keyForce;
-        }
-        if(this.down){
-            this.acc.y += this.keyForce;
-        }
-    }
-}
-
 class Capsule extends Body{
     constructor(x1, y1, x2, y2, r, m){
         super();
@@ -450,7 +409,7 @@ class Star extends Body{
         p3 = center.add(upDir.mult(r/2)).add(upDir.normal().mult(r*Math.sqrt(3)/2));
         this.comp.push(new Triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y));
         this.pos = this.comp[0].pos;
-        
+
         this.m = m;
         if (this.m === 0){
             this.inv_m = 0;
@@ -499,16 +458,6 @@ class Star extends Body{
    }
 }
 
-class Wall extends Body{
-    constructor(x1, y1, x2, y2){
-        super();
-        this.start = new Vector(x1, y1);
-        this.end = new Vector(x2, y2);
-        this.comp = [new Line(x1, y1, x2, y2)];
-        this.dir = this.end.subtr(this.start).unit();
-        this.pos = new Vector((x1+x2)/2, (y1+y2)/2);
-    }
-}
 
 //Collision manifold, consisting the data for collision handling
 //Manifolds are collected in an array for every frame
@@ -555,7 +504,7 @@ class CollData{
         this.o2.vel = this.o2.vel.add(impulseVec.mult(-this.o2.inv_m));
 
         this.o1.angVel += this.o1.inv_inertia * Vector.cross(collArm1, impulseVec);
-        this.o2.angVel -= this.o2.inv_inertia * Vector.cross(collArm2, impulseVec); 
+        this.o2.angVel -= this.o2.inv_inertia * Vector.cross(collArm2, impulseVec);
     }
 }
 
@@ -605,7 +554,7 @@ function lineSegmentIntersection(p1,p2,q1,q2){
     let s = q2.subtr(q1)
     let qp = q1.subtr(p1)
     let denom = Vector.cross(r,s)
-    
+
     let u = Vector.cross(qp,r) / denom;
     let t = Vector.cross(qp,s) / denom;
 
@@ -630,7 +579,7 @@ function lineSegmentIntersection(p1,p2,q1,q2){
         return resultVector
     } else {
         return false
-    }     
+    }
 }
 
 //Separating axis theorem on two objects
@@ -678,7 +627,7 @@ function sat(o1, o2){
                     smallestAxis = axes[i].mult(-1);
                 }
             }
-        }  
+        }
     };
 
     let contactVertex = projShapeOntoAxis(smallestAxis, vertexObj).collVertex;
@@ -707,14 +656,14 @@ function projShapeOntoAxis(axis, obj){
         if(p<min){
             min = p;
             collVertex = obj.vertex[i];
-        } 
+        }
         if(p>max){
             max = p;
         }
     }
     return {
         min: min,
-        max: max, 
+        max: max,
         collVertex: collVertex
     }
 }
@@ -727,7 +676,7 @@ function findAxes(o1, o2){
             axes.push(o2.pos.subtr(o1.pos).unit());
         } else {
             axes.push(new Vector(Math.random(), Math.random()).unit());
-        }        
+        }
         return axes;
     }
     if(o1 instanceof Circle){
@@ -735,7 +684,7 @@ function findAxes(o1, o2){
     }
     if(o1 instanceof Line){
         axes.push(o1.dir.normal());
-    }   
+    }
     if (o1 instanceof Rectangle){
         axes.push(o1.dir.normal());
         axes.push(o1.dir);
@@ -750,7 +699,7 @@ function findAxes(o1, o2){
     }
     if (o2 instanceof Line){
         axes.push(o2.dir.normal());
-    }   
+    }
     if (o2 instanceof Rectangle){
         axes.push(o2.dir.normal());
         axes.push(o2.dir);
@@ -804,18 +753,11 @@ function setBallVerticesAlongAxis(obj, axis){
 function collisionHandlingCondition(body1, body2){
     return (
         (body1.layer === body2.layer && !(body1.layer === -1 || body1.layer === -2)) ||
-        (body1.layer === 0 && body2.layer !== -2) || 
-        (body2.layer === 0 && body1.layer !== -2) 
+        (body1.layer === 0 && body2.layer !== -2) ||
+        (body2.layer === 0 && body1.layer !== -2)
     )
 }
 
-//Prevents objects to float away from the canvas
-function putWallsAround(x1, y1, x2, y2){
-    let edge1 = new Wall(x1, y1, x2, y1);
-    let edge2 = new Wall(x2, y1, x2, y2);
-    let edge3 = new Wall(x2, y2, x1, y2);
-    let edge4 = new Wall(x1, y2, x1, y1);
-}
 
 function collide(o1, o2){
     let bestSat = {
@@ -843,22 +785,20 @@ function userInteraction(){
     })
 }
 
-function gameLogic(){}
-
 function physicsLoop(timestamp) {
     COLLISIONS.length = 0;
-    
+
     BODIES.forEach((b) => {
         b.reposition();
     })
-    
+
     BODIES.forEach((b, index) => {
         for(let bodyPair = index+1; bodyPair < BODIES.length; bodyPair++){
-           if(collisionHandlingCondition(BODIES[index], BODIES[bodyPair])){               
+           if(collisionHandlingCondition(BODIES[index], BODIES[bodyPair])){
                 let bestSat = collide(BODIES[index], BODIES[bodyPair]);
                 if(bestSat){
                     COLLISIONS.push(new CollData(BODIES[index], BODIES[bodyPair], bestSat.axis, bestSat.pen, bestSat.vertex));
-                }           
+                }
             }
         }
     });
@@ -880,15 +820,3 @@ function renderLoop(){
     userInterface();
 }
 
-function mainLoop(){
-    userInteraction();
-    physicsLoop();
-    renderLoop();
-    gameLogic();
-    requestAnimationFrame(mainLoop);
-}
-
-function renderOnly(){
-    renderLoop();
-    requestAnimationFrame(renderOnly);
-}
