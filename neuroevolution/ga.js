@@ -90,7 +90,7 @@ class GeneticEvolution {
 
 class PopulationHandler {
     /**
-     * @param {PopulationItem[]}population
+     * @param PopulationItem[] population
      */
     constructor(population) {
         this.population = population;

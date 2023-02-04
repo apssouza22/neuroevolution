@@ -58,7 +58,7 @@ class Vector{
     }
 }
 
-class Matrix{
+class Matrix2{
     constructor(rows, cols){
         this.rows = rows;
         this.cols = cols;
@@ -152,7 +152,7 @@ class Rectangle{
         this.vertex[3] = this.vertex[2].add(this.dir.mult(-this.length));
         this.pos = this.vertex[0].add(this.dir.mult(this.length/2)).add(this.dir.normal().mult(this.width/2));
         this.angle = 0;
-        this.rotMat = new Matrix(2,2);
+        this.rotMat = new Matrix2(2,2);
     }
 
     draw(){

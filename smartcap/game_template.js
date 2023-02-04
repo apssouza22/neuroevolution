@@ -38,15 +38,16 @@ nextGenButton.onclick = () => {
     nextGeneration();
 }
 road = getRoad()
+let geneticEvolution = new GeneticEvolution(smartCapsPop);
 // STEP 2: defining the game logic
 function gameLogic(){
     if(capsAreMoving){
         if(counter % 3 === 0){
             smartCapsPop.caps.forEach(caps => {
                 if(stepCounter < 300){
-                    caps.brain.setInputValues(caps.getSensorData(road.walls))
-                    caps.brain.feedForward()
-                    caps.makeMove()
+                    // caps.brain.setInputValues(caps.getSensorData(road.walls))
+                    // caps.brain.feedForward()
+                    caps.makeMove(caps.getSensorData(road.walls))
                 } else {
                     caps.stop()
                 }
@@ -57,9 +58,9 @@ function gameLogic(){
                 nextGenButton.disabled = false
                 capsAreMoving = false
                 smartCapsPop.setFitness()
-                // smartCapsPop.createNextGen()
                 genDataField.innerHTML += `<br/>Gen ${smartCapsPop.generation} - Avg dist: ${Math.floor(smartCapsPop.fitnessSum() / smartCapsPop.popSize)}`
                 nextGenButton.textContent = `Launch Generation ${smartCapsPop.generation+1}`
+                geneticEvolution.evolve();
 
             }
             stepCounter++
@@ -68,7 +69,7 @@ function gameLogic(){
         counter++
     }
     if(!nextGenButton.disabled){
-        // nextGeneration();
+        nextGeneration();
     }
     smartCapsPop.caps.forEach(caps => {
         ctx.fillStyle = "white"

@@ -1,6 +1,6 @@
-class SmartCaps{
+class SmartCaps extends PopulationItem{
     constructor(x1, y1, x2, y2, r, m){
-        // super(x1, y1, x2, y2, r, m)
+        super()
         this.comp = [];
         this.pos = new Vector(this.x, this.y);
         this.m = 0;
@@ -46,7 +46,7 @@ class SmartCaps{
             this.inv_inertia = 1 / this.inertia;
         }
 
-        this.brain = new NeuralNetwork(5,5,4)
+        this.genetics = new Genetics([5, 5, 4]);
         this.layer = -1
         this.friction = 0.06
         this.angFriction = 0.05
@@ -70,7 +70,6 @@ class SmartCaps{
             this.comp[i].draw();
         }
     }
-    keyControl(){}
     setColor(color){
         this.comp.forEach(comp => {
             comp.color = color
@@ -80,6 +79,10 @@ class SmartCaps{
         if (BODIES.indexOf(this) !== -1){
             BODIES.splice(BODIES.indexOf(this), 1);
         }
+    }
+
+    calcFitness(){
+        this.fitness = this.reward**4
     }
 
     keyControl(){
@@ -122,22 +125,22 @@ class SmartCaps{
     }
 
     // iterating through the brain array and changing the acceleration accordingly
-    makeMove(){
+    makeMove(sensorData){
         this.left = false;
         this.right = false;
         this.up = false;
         this.down = false;
-
-        if(this.brain.oOutputValues[0] === 1){
+        let outputs = this.genetics.useGenes(sensorData)
+        if(outputs[0] === 1){
             this.left = true
         }
-        if(this.brain.oOutputValues[1] === 1){
+        if(outputs[1] === 1){
             this.right = true
         }
-        if(this.brain.oOutputValues[2] === 1){
+        if(outputs[2] === 1){
             this.up = true
         }
-        if(this.brain.oOutputValues[3] === 1){
+        if(outputs[3] === 1){
             this.down = true
         }
     }
