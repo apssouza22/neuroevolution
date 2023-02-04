@@ -57,7 +57,7 @@ function gameLogic(){
                 nextGenButton.disabled = false
                 capsAreMoving = false
                 smartCapsPop.setFitness()
-                smartCapsPop.createNextGen()
+                // smartCapsPop.createNextGen()
                 genDataField.innerHTML += `<br/>Gen ${smartCapsPop.generation} - Avg dist: ${Math.floor(smartCapsPop.fitnessSum() / smartCapsPop.popSize)}`
                 nextGenButton.textContent = `Launch Generation ${smartCapsPop.generation+1}`
 

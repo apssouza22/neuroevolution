@@ -1,5 +1,5 @@
 // Game engine for the car game
-class CapsGame {
+class Game {
 
     /**
      * Constructor

@@ -286,9 +286,35 @@ class Body{
     }
 }
 
-class Capsule extends Body{
+class Capsule {
     constructor(x1, y1, x2, y2, r, m){
-        super();
+        this.comp = [];
+        this.pos = new Vector(this.x, this.y);
+        this.m = 0;
+        this.inv_m = 0;
+        this.inertia = 0;
+        this.inv_inertia = 0;
+        this.elasticity = 1;
+
+        this.friction = 0;
+        this.angFriction = 0;
+        this.maxSpeed = 0;
+        this.layer = 0;
+
+        this.up = false;
+        this.down = false;
+        this.left = false;
+        this.right = false;
+        this.action = false;
+
+        this.vel = new Vector(0, 0);
+        this.acc = new Vector(0, 0);
+        this.keyForce = 1;
+        this.angKeyForce = 0.1;
+        this.angle = 0;
+        this.angVel = 0;
+        this.player = false;
+        BODIES.push(this);
         this.comp = [new Circle(x1, y1, r), new Circle(x2, y2, r)];
         let recV1 = this.comp[1].pos.add(this.comp[1].pos.subtr(this.comp[0].pos).unit().normal().mult(r));
         let recV2 = this.comp[0].pos.add(this.comp[1].pos.subtr(this.comp[0].pos).unit().normal().mult(r));
@@ -305,6 +331,23 @@ class Capsule extends Body{
             this.inv_inertia = 0;
         } else {
             this.inv_inertia = 1 / this.inertia;
+        }
+    }
+
+    render(){
+        for (let i in this.comp){
+            this.comp[i].draw();
+        }
+    }
+    keyControl(){}
+    setColor(color){
+        this.comp.forEach(comp => {
+            comp.color = color
+        })
+    }
+    remove(){
+        if (BODIES.indexOf(this) !== -1){
+            BODIES.splice(BODIES.indexOf(this), 1);
         }
     }
 
@@ -337,7 +380,13 @@ class Capsule extends Body{
     }
 
     reposition(){
-        super.reposition();
+        this.acc = this.acc.unit().mult(this.keyForce);
+        this.vel = this.vel.add(this.acc);
+        this.vel = this.vel.mult(1-this.friction);
+        if (this.vel.mag() > this.maxSpeed && this.maxSpeed !== 0){
+            this.vel = this.vel.unit().mult(this.maxSpeed);
+        }
+        this.angVel *= (1-this.angFriction);
         this.setPosition(this.pos.add(this.vel).x, this.pos.add(this.vel).y);
     }
 }

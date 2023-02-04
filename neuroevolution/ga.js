@@ -97,11 +97,9 @@ class PopulationHandler {
     }
 
     /**
-     * Abstract method. Requires implementation on the child class
      * Reset the population state.
      */
     reset() {
-        // TODO remove this implementation
         for (const p of this.population) {
             p.fitness = 0;
         }
@@ -123,12 +121,10 @@ class PopulationHandler {
     }
 
     /**
-     * Abstract method. Requires implementation on the child class
      * Sort population by fitness
      * @returns {PopulationItem[]}
      */
     sortByFitness() {
-        // TODO remove this implementation
         return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
     }
 }

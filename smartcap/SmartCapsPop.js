@@ -27,7 +27,7 @@ class SmartCapsPop {
         })
         return vSum
     }
- 
+
     // the average distance of the members from the target
     targetDistanceAvg() {
         let dSum = 0
