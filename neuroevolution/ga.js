@@ -39,10 +39,9 @@ class GeneticEvolution {
      */
     select() {
         const bests = this.populationHandler.sortByFitness();
-        let fitness = bests.map( i =>{
-            return i.getFitness()
-        }).join(",")
-        console.log(fitness)
+        if (bests[0].calcFitness() < bests[0].calcFitness()){
+            throw Error("calcFitness operation is not working properly. Please review it")
+        }
         return [bests[0], bests[1]];
     }
 
@@ -153,14 +152,6 @@ class PopulationItem {
      */
     calcFitness() {
         // TODO remove this implementation
-        return this.fitness
-    }
-
-    /**
-     * Get fitness
-     * @returns {number}
-     */
-    getFitness(){
         return this.fitness
     }
 }

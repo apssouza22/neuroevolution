@@ -46,7 +46,6 @@ class SmartCaps extends PopulationItem{
             this.inv_inertia = 1 / this.inertia;
         }
 
-        this.brain = new NeuralNetwork2(5,5,4)
         this.genetics = new Genetics([5,6, 4, 4]);
 
         this.layer = -1
@@ -134,20 +133,6 @@ class SmartCaps extends PopulationItem{
         this.up = false;
         this.down = false;
         let output = this.genetics.useGenes(sensorData)
-        // console.log(output, this.brain.oOutputValues)
-
-        // if(this.brain.oOutputValues[0] === 1){
-        //     this.left = true
-        // }
-        // if(this.brain.oOutputValues[1] === 1){
-        //     this.right = true
-        // }
-        // if(this.brain.oOutputValues[2] === 1){
-        //     this.up = true
-        // }
-        // if(this.brain.oOutputValues[3] === 1){
-        //     this.down = true
-        // }
 
         if(output[0] === 1){
             this.left = true

@@ -55,86 +55,6 @@ class SmartCapsPop extends PopulationHandler{
         return fSum
     }
 
-    // selecting a member based on their fitness values
-    pickCaps(){
-        let picker = Math.random()
-        let fitnessSum = this.fitnessSum()
-        let currentSum = 0
-        for(let i=0; i<=this.caps.length; i++){
-            currentSum += this.caps[i].fitness / fitnessSum
-            if(picker < currentSum){
-                this.caps[i].comp[1].color = "orange"
-                return this.caps[i]
-            }
-        }
-    }
-
-    // creating a new brain array by mixing two
-    crossover(parent1, parent2){
-        let newBrain = new NeuralNetwork2(5,5,4)
-        for(let i=0; i < newBrain.hPerc.length; i++){
-            for(let j=0; j<newBrain.hPerc[i].weights.length; j++){
-                newBrain.hPerc[i].weights[j] =
-                Math.random() < parent1.reward / (parent1.reward+parent2.reward) ?
-                parent1.brain.hPerc[i].weights[j] :
-                parent2.brain.hPerc[i].weights[j]
-            }
-            newBrain.hPerc[i].bias =
-                Math.random() < parent1.reward / (parent1.reward+parent2.reward) ?
-                parent1.brain.hPerc[i].bias :
-                parent2.brain.hPerc[i].bias
-        }
-        for(let i=0; i < newBrain.oPerc.length; i++){
-            for(let j=0; j<newBrain.oPerc[i].weights.length; j++){
-                newBrain.oPerc[i].weights[j] =
-                Math.random() < parent1.reward / (parent1.reward+parent2.reward) ?
-                parent1.brain.oPerc[i].weights[j] :
-                parent2.brain.oPerc[i].weights[j]
-            }
-            newBrain.oPerc[i].bias =
-                Math.random() < parent1.reward / (parent1.reward+parent2.reward) ?
-                parent1.brain.oPerc[i].bias :
-                parent2.brain.oPerc[i].bias
-        }
-        return newBrain
-    }
-
-    // modifying any element of the brain array with a certain probability
-    mutation(brain){
-        for(let i=0; i<brain.hPerc.length; i++){
-            for(let j=0; j< brain.hPerc[i].weights.length; j++){
-                if(this.mutationRate > Math.random()){
-                    brain.hPerc[i].weights[j] = Math.random()*2 - 1
-                }
-            }
-            if(this.mutationRate > Math.random()){
-                brain.hPerc[i].bias = Math.random()*2 - 1
-            }
-        }
-        for(let i=0; i<brain.oPerc.length; i++){
-            for(let j=0; j< brain.oPerc[i].weights.length; j++){
-                if(this.mutationRate > Math.random()){
-                    brain.oPerc[i].weights[j] = Math.random()*2 - 1
-                }
-            }
-            if(this.mutationRate > Math.random()){
-                brain.oPerc[i].bias = Math.random()*2 - 1
-            }
-        }
-    }
-
-    // creating a new array of brains by selection, crossover and mutation
-    createNextGen(){
-        for(let i=0; i < this.popSize; i++){
-            let parent1 = this.pickCaps()
-            let parent2 = this.pickCaps()
-            let newBrain = this.crossover(parent1, parent2)
-            this.mutation(newBrain)
-            this.nextGenBrains.push(newBrain)
-        }
-    }
-
-    // the old brains get replaced by the new brains
     // population members are set to original position
     replaceNextGen(){
         for(let i=0; i < this.popSize; i++){
@@ -147,6 +67,7 @@ class SmartCapsPop extends PopulationHandler{
         this.nextGenBrains = []
         this.generation++
     }
+
     reset(){
         super.reset()
         this.replaceNextGen()

@@ -64,7 +64,6 @@ starterButton.onclick = () => {
     stepCounter = 0
 }
 function nextGeneration() {
-    // smartCapsPop.replaceNextGen()
     counter = 0
     stepCounter = 0
     capsAreMoving = true
@@ -82,8 +81,6 @@ function gameLogic(){
         if(counter % 3 === 0){
             smartCapsPop.caps.forEach(caps => {
                 if(stepCounter < 300){
-                    caps.brain.setInputValues(caps.getSensorData(raceWalls))
-                    caps.brain.feedForward()
                     caps.makeMove(caps.getSensorData(raceWalls))
                 } else {
                     caps.stop()
@@ -94,8 +91,6 @@ function gameLogic(){
                 starterButton.disabled = false
                 nextGenButton.disabled = false
                 capsAreMoving = false
-                smartCapsPop.setFitness()
-                smartCapsPop.createNextGen()
                 genDataField.innerHTML += `<br/>Gen ${smartCapsPop.generation} - Avg dist: ${Math.floor(smartCapsPop.fitnessSum() / smartCapsPop.popSize)}`
                 nextGenButton.textContent = `Launch Generation ${smartCapsPop.generation+1}`
                 geneticEvolution.evolve()
