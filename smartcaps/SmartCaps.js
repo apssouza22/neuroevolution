@@ -1,7 +1,54 @@
-class SmartCaps extends Capsule{
+class SmartCaps extends PopulationItem{
     constructor(x1, y1, x2, y2, r, m){
-        super(x1, y1, x2, y2, r, m)
-        this.brain = new NeuralNetwork(5,5,4)
+        super()
+        this.comp = [];
+        this.pos = new Vector(this.x, this.y);
+        this.m = 0;
+        this.inv_m = 0;
+        this.inertia = 0;
+        this.inv_inertia = 0;
+        this.elasticity = 1;
+
+        this.friction = 0;
+        this.angFriction = 0;
+        this.maxSpeed = 0;
+        this.layer = 0;
+
+        this.up = false;
+        this.down = false;
+        this.left = false;
+        this.right = false;
+        this.action = false;
+
+        this.vel = new Vector(0, 0);
+        this.acc = new Vector(0, 0);
+        this.keyForce = 1;
+        this.angKeyForce = 0.1;
+        this.angle = 0;
+        this.angVel = 0;
+        this.player = false;
+        BODIES.push(this);
+        this.comp = [new Circle(x1, y1, r), new Circle(x2, y2, r)];
+        let recV1 = this.comp[1].pos.add(this.comp[1].pos.subtr(this.comp[0].pos).unit().normal().mult(r));
+        let recV2 = this.comp[0].pos.add(this.comp[1].pos.subtr(this.comp[0].pos).unit().normal().mult(r));
+        this.comp.unshift(new Rectangle(recV1.x, recV1.y, recV2.x, recV2.y, 2*r));
+        this.pos = this.comp[0].pos;
+        this.m = m;
+        if (this.m === 0){
+            this.inv_m = 0;
+        } else {
+            this.inv_m = 1 / this.m;
+        }
+        this.inertia = this.m * ((2*this.comp[0].width)**2 +(this.comp[0].length+2*this.comp[0].width)**2) / 12;
+        if (this.m === 0){
+            this.inv_inertia = 0;
+        } else {
+            this.inv_inertia = 1 / this.inertia;
+        }
+
+        this.brain = new NeuralNetwork2(5,5,4)
+        this.genetics = new Genetics([5,6, 4, 4]);
+
         this.layer = -1
         this.friction = 0.06
         this.angFriction = 0.05
@@ -20,23 +67,98 @@ class SmartCaps extends Capsule{
         this.sensorValues = []
     }
 
+    render(){
+        for (let i in this.comp){
+            this.comp[i].draw();
+        }
+    }
+    setColor(color){
+        this.comp.forEach(comp => {
+            comp.color = color
+        })
+    }
+    remove(){
+        if (BODIES.indexOf(this) !== -1){
+            BODIES.splice(BODIES.indexOf(this), 1);
+        }
+    }
+
+    calcFitness(){
+        this.fitness = this.reward**4
+        return this.fitness
+    }
+
+    keyControl(){
+        if(this.up){
+            this.acc = this.comp[0].dir.mult(-this.keyForce);
+        }
+        if(this.down){
+            this.acc = this.comp[0].dir.mult(this.keyForce);
+        }
+        if(this.left){
+            this.angVel = -this.angKeyForce;
+        }
+        if(this.right){
+            this.angVel = this.angKeyForce;
+        }
+        if(!this.up && !this.down){
+            this.acc.set(0, 0);
+        }
+    }
+
+    setPosition(x, y, a = this.angle){
+        this.pos.set(x, y);
+        this.angle = a;
+        this.comp[0].pos = this.pos;
+        this.comp[0].getVertices(this.angle + this.angVel);
+        this.comp[1].pos = this.comp[0].pos.add(this.comp[0].dir.mult(-this.comp[0].length/2));
+        this.comp[2].pos = this.comp[0].pos.add(this.comp[0].dir.mult(this.comp[0].length/2));
+        this.angle += this.angVel;
+    }
+
+    reposition(){
+        this.acc = this.acc.unit().mult(this.keyForce);
+        this.vel = this.vel.add(this.acc);
+        this.vel = this.vel.mult(1-this.friction);
+        if (this.vel.mag() > this.maxSpeed && this.maxSpeed !== 0){
+            this.vel = this.vel.unit().mult(this.maxSpeed);
+        }
+        this.angVel *= (1-this.angFriction);
+        this.setPosition(this.pos.add(this.vel).x, this.pos.add(this.vel).y);
+    }
+
     // iterating through the brain array and changing the acceleration accordingly
-    makeMove(){
+    makeMove(sensorData){
         this.left = false;
         this.right = false;
         this.up = false;
         this.down = false;
+        let output = this.genetics.useGenes(sensorData)
+        // console.log(output, this.brain.oOutputValues)
 
-        if(this.brain.oOutputValues[0] === 1){
+        // if(this.brain.oOutputValues[0] === 1){
+        //     this.left = true
+        // }
+        // if(this.brain.oOutputValues[1] === 1){
+        //     this.right = true
+        // }
+        // if(this.brain.oOutputValues[2] === 1){
+        //     this.up = true
+        // }
+        // if(this.brain.oOutputValues[3] === 1){
+        //     this.down = true
+        // }
+
+        if(output[0] === 1){
             this.left = true
         }
-        if(this.brain.oOutputValues[1] === 1){
+        if(output[1] === 1){
             this.right = true
         }
-        if(this.brain.oOutputValues[2] === 1){
+        if(output[2] === 1){
             this.up = true
         }
-        if(this.brain.oOutputValues[3] === 1){
+        if(output[3] === 1){
             this.down = true
         }
     }
@@ -70,9 +192,9 @@ class SmartCaps extends Capsule{
                 if(intersection &&
                     intersection.subtr(this.sensors.start).mag() <
                     closestPoint.subtr(this.sensors.start).mag()){
-                        closestPoint = intersection
-                        this.sensors.line.color = "red"
-                    }
+                    closestPoint = intersection
+                    this.sensors.line.color = "red"
+                }
             })
             this.sensorValues[i] = closestPoint.subtr(this.sensors.start).mag()
             testCircle(closestPoint.x, closestPoint.y, "green")

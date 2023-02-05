@@ -20,7 +20,7 @@ class GeneticEvolution {
     evolve() {
         const [mom, dad] = this.select();
         const children = this.reproduce(mom, dad);
-        this.populationHandler.addPopulation(children);
+        this.populationHandler.addPopulation([mom, dad, ...children]);
         this.populationHandler.reset();
         this.generation++;
         console.log("New generation " + this.generation);
@@ -39,6 +39,10 @@ class GeneticEvolution {
      */
     select() {
         const bests = this.populationHandler.sortByFitness();
+        let fitness = bests.map( i =>{
+            return i.getFitness()
+        }).join(",")
+        console.log(fitness)
         return [bests[0], bests[1]];
     }
 
@@ -149,6 +153,14 @@ class PopulationItem {
      */
     calcFitness() {
         // TODO remove this implementation
+        return this.fitness
+    }
+
+    /**
+     * Get fitness
+     * @returns {number}
+     */
+    getFitness(){
         return this.fitness
     }
 }

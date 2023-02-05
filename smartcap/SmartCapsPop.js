@@ -65,6 +65,7 @@ class SmartCapsPop extends  PopulationHandler{
             this.caps[i].comp[1].color = "yellowgreen"
             this.caps[i].reward = 0
         }
+        this.addPopulation(this.caps)
         this.nextGenBrains = []
         this.generation++
     }

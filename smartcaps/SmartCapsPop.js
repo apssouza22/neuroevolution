@@ -1,5 +1,6 @@
-class SmartCapsPop {
+class SmartCapsPop extends PopulationHandler{
     constructor(popSize){
+        super([])
         this.caps = []
         this.popSize = popSize
         this.mutationRate = 0.05
@@ -17,6 +18,7 @@ class SmartCapsPop {
             }
             this.caps[i] = new SmartCaps(this.startingPoint.x, this.startingPoint.y+10, this.startingPoint.x, this.startingPoint.y-10, 10, 5)
         }
+        this.addPopulation(this.caps)
     }
 
     // the sum of the populations members velocities
@@ -27,7 +29,7 @@ class SmartCapsPop {
         })
         return vSum
     }
- 
+
     // the average distance of the members from the target
     targetDistanceAvg() {
         let dSum = 0
@@ -69,7 +71,7 @@ class SmartCapsPop {
 
     // creating a new brain array by mixing two
     crossover(parent1, parent2){
-        let newBrain = new NeuralNetwork(5,5,4)
+        let newBrain = new NeuralNetwork2(5,5,4)
         for(let i=0; i < newBrain.hPerc.length; i++){
             for(let j=0; j<newBrain.hPerc[i].weights.length; j++){
                 newBrain.hPerc[i].weights[j] =
@@ -144,5 +146,9 @@ class SmartCapsPop {
         }
         this.nextGenBrains = []
         this.generation++
+    }
+    reset(){
+        super.reset()
+        this.replaceNextGen()
     }
 }
