@@ -50,7 +50,7 @@ class SmartCapsPop extends PopulationHandler{
     fitnessSum(){
         let fSum = 0
         this.caps.forEach(caps => {
-            fSum += caps.fitness
+            fSum += caps.calcFitness()
         })
         return fSum
     }

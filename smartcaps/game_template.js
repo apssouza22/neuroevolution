@@ -50,12 +50,10 @@ let smartCapsPop = new SmartCapsPop(20)
 let capsAreMoving = false
 
 let starterButton = document.getElementById("relaunch")
-let nextGenButton = document.getElementById("nextGen")
 let genDataField = document.getElementById("genData")
-nextGenButton.disabled = true
+
 starterButton.onclick = () => {
     starterButton.disabled = true
-    nextGenButton.disabled = true
     genDataField.innerHTML = ``
     smartCapsPop.generation = 1
     capsAreMoving = true
@@ -68,12 +66,8 @@ function nextGeneration() {
     stepCounter = 0
     capsAreMoving = true
     starterButton.disabled = true
-    nextGenButton.disabled = true
 }
 
-nextGenButton.onclick = () => {
-    nextGeneration();
-}
 let geneticEvolution = new GeneticEvolution(smartCapsPop);
 // STEP 2: defining the game logic
 function gameLogic(){
@@ -88,11 +82,8 @@ function gameLogic(){
                 caps.getReward()
             })
             if(smartCapsPop.velocitySum() < 0.01 && stepCounter > 0){
-                starterButton.disabled = false
-                nextGenButton.disabled = false
                 capsAreMoving = false
                 genDataField.innerHTML += `<br/>Gen ${smartCapsPop.generation} - Avg dist: ${Math.floor(smartCapsPop.fitnessSum() / smartCapsPop.popSize)}`
-                nextGenButton.textContent = `Launch Generation ${smartCapsPop.generation+1}`
                 geneticEvolution.evolve()
             }
             stepCounter++
@@ -100,7 +91,7 @@ function gameLogic(){
         }
         counter++
     }
-    if(!nextGenButton.disabled){
+    if(!capsAreMoving && starterButton.disabled){
         nextGeneration();
     }
     smartCapsPop.caps.forEach(caps => {
