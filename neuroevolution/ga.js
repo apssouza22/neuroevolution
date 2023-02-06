@@ -7,7 +7,7 @@ class GeneticEvolution {
 
     /**
      * @param {PopulationHandler} populationHandler
-     * @param {number}m Mutation rate 0-1
+     * @param {number} m Mutation rate 0-1
      */
     constructor(populationHandler, m = 0.1) {
         this.populationHandler = populationHandler;
@@ -38,6 +38,7 @@ class GeneticEvolution {
      * Select the best item from the population (elitism)
      */
     select() {
+        this.populationHandler.calculateFitness()
         const bests = this.populationHandler.sortByFitness();
         if (bests[0].calcFitness() < bests[0].calcFitness()){
             throw Error("calcFitness operation is not working properly. Please review it")
@@ -121,6 +122,15 @@ class PopulationHandler {
      */
     addPopulation(population) {
         this.population = population;
+    }
+
+    /**
+     * Calculate the fitness of all items in the population
+     */
+    calculateFitness() {
+        for (const p of this.population) {
+            p.calcFitness();
+        }
     }
 
     /**
