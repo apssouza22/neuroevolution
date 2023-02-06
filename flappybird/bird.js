@@ -3,8 +3,9 @@
 // http://thecodingtrain.com
 // https://youtu.be/cdUNkwXx-I4
 
-class Bird {
-  constructor(brain) {
+class Bird extends PopulationItem{
+  constructor() {
+    super([5, 8, 2]);
     this.y = height / 2;
     this.x = 64;
 
@@ -14,15 +15,7 @@ class Bird {
 
     this.score = 0;
     this.fitness = 0;
-    if (brain) {
-      this.brain = brain.copy();
-    } else {
-      this.brain = new NeuralNetwork(5, 8, 2);
-    }
-  }
 
-  dispose() {
-    this.brain.dispose();
   }
 
   show() {
@@ -35,12 +28,28 @@ class Bird {
     this.velocity += this.lift;
   }
 
-  mutate() {
-    this.brain.mutate(0.1);
+  think(pipes) {
+    let closestPipe = this.getClosestPipe(pipes);
+    let inputs = this.prepareEnvInput(closestPipe);
+
+    let output =this.genetics.useGenes(inputs)
+
+    if (output[0] > output[1]) {
+      this.up();
+    }
   }
 
-  think(pipes) {
-    // Find the closest pipe
+  prepareEnvInput(closestPipe) {
+    let inputs = [];
+    inputs[0] = this.y / height;
+    inputs[1] = closestPipe.top / height;
+    inputs[2] = closestPipe.bottom / height;
+    inputs[3] = closestPipe.x / width;
+    inputs[4] = this.velocity / 10;
+    return inputs;
+  }
+
+  getClosestPipe(pipes) {
     let closest = null;
     let closestD = Infinity;
     for (let i = 0; i < pipes.length; i++) {
@@ -50,18 +59,7 @@ class Bird {
         closestD = d;
       }
     }
-
-    let inputs = [];
-    inputs[0] = this.y / height;
-    inputs[1] = closest.top / height;
-    inputs[2] = closest.bottom / height;
-    inputs[3] = closest.x / width;
-    inputs[4] = this.velocity / 10;
-    let output = this.brain.predict(inputs);
-    //if (output[0] > output[1] && this.velocity >= 0) {
-    if (output[0] > output[1]) {
-      this.up();
-    }
+    return closest;
   }
 
   offScreen() {
@@ -72,7 +70,11 @@ class Bird {
     this.score++;
 
     this.velocity += this.gravity;
-    //this.velocity *= 0.9;
     this.y += this.velocity;
+  }
+
+  calcFitness() {
+    this.fitness = this.score
+    return this.fitness;
   }
 }

@@ -9,6 +9,7 @@ let savedBirds = [];
 let pipes = [];
 let counter = 0;
 let slider;
+let genericEvolution;
 
 function keyPressed() {
   if (key === 'S') {
@@ -24,6 +25,7 @@ function setup() {
   for (let i = 0; i < TOTAL; i++) {
     birds[i] = new Bird();
   }
+  genericEvolution = new GeneticEvolution(new BirdsPopulation(savedBirds));
 }
 
 function draw() {
@@ -49,7 +51,8 @@ function draw() {
 
     for (let i = birds.length - 1; i >= 0; i--) {
       if (birds[i].offScreen()) {
-        savedBirds.push(birds.splice(i, 1)[0]);
+        let spliceElement = birds.splice(i, 1)[0];
+        savedBirds.push(spliceElement);
       }
     }
 

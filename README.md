@@ -48,6 +48,7 @@ geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
 <a href="https://www.buymeacoffee.com/apssouza"><img src="https://miro.medium.com/max/654/1*rQv8JgstmK0juxP-Kb4IGg.jpeg"></a>
 
 ---
-This project uses two other projects:
+This project apply the library to three different projects:
 - [Self-driving car](https://github.com/gniziemazity/Self-driving-car)
 - [SmartCaps](https://github.com/danielszabo88/smartCaps)
+- [Flappy bird](https://github.com/CodingTrain/website-archive/tree/main/Courses/natureofcode/11.3_neuroevolution_tfjs.js)

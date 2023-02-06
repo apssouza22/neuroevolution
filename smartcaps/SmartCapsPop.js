@@ -40,7 +40,7 @@ class SmartCapsPop extends PopulationHandler{
     }
 
     // gives a fitness value to each members of the population
-    setFitness(){
+    calculateFitness(){
         this.caps.forEach(caps => {
             caps.fitness = caps.reward**4
         })

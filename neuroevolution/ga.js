@@ -40,8 +40,8 @@ class GeneticEvolution {
     select() {
         this.populationHandler.calculateFitness()
         const bests = this.populationHandler.sortByFitness();
-        if (bests[0].calcFitness() < bests[0].calcFitness()){
-            throw Error("calcFitness operation is not working properly. Please review it")
+        if (bests.length < 1 || bests[0].calcFitness() < bests[0].calcFitness()){
+            throw Error("calcFitness operation is not working properly or population is empty. Please review it")
         }
         return [bests[0], bests[1]];
     }
@@ -156,6 +156,13 @@ class PopulationItem {
     fitness;
 
     /**
+     * @param [] layer_nodes_counts
+     */
+    constructor(layer_nodes_counts) {
+        this.genetics = new Genetics(layer_nodes_counts)
+    }
+
+    /**
      * Abstract method. Requires implementation on the child class
      * Calculates the fitness of the item
      * @returns {number}
@@ -172,6 +179,9 @@ class PopulationItem {
  */
 class Genetics {
 
+    /**
+     * @param [] layer_nodes_counts
+     */
     constructor(layer_nodes_counts) {
         this.nn = new NeuralNetwork(layer_nodes_counts);
     }
