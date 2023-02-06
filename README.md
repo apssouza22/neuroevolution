@@ -13,7 +13,7 @@ Evolution of the population then takes place after the repeated application of t
 
 The project is developed from scratch and with no external libraries.
 
-![Alt text](nn.png?raw=true "Self driving car")
+![Alt text](smartcar/nn.png?raw=true "Self driving car")
 
 ## NeuroEvolution library
 We have made the NeuroEvolution framework totally independent of the game this way we can use it in any game we want.
@@ -38,7 +38,7 @@ See the [Car](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L1
 You can use the population genes to play the game. See the [Car.steer](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L71) for an example.
 ```
 geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
-    let output = item.useGenome(input);
+    let output = item.useGenes(input);
     log(output);
 });
 ```
