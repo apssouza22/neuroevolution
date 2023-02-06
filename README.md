@@ -48,4 +48,6 @@ geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
 <a href="https://www.buymeacoffee.com/apssouza"><img src="https://miro.medium.com/max/654/1*rQv8JgstmK0juxP-Kb4IGg.jpeg"></a>
 
 ---
-This project is highly inspired by [this](https://github.com/gniziemazity/Self-driving-car) other project.
+This project uses two other projects:
+- [Self-driving car](https://github.com/gniziemazity/Self-driving-car)
+- [SmartCaps](https://github.com/danielszabo88/smartCaps)
