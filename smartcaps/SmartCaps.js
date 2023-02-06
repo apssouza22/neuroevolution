@@ -1,6 +1,6 @@
 class SmartCaps extends PopulationItem{
     constructor(x1, y1, x2, y2, r, m){
-        super()
+        super([5,6, 4, 4])
         this.comp = [];
         this.pos = new Vector(this.x, this.y);
         this.m = 0;
@@ -45,8 +45,6 @@ class SmartCaps extends PopulationItem{
         } else {
             this.inv_inertia = 1 / this.inertia;
         }
-
-        this.genetics = new Genetics([5,6, 4, 4]);
 
         this.layer = -1
         this.friction = 0.06

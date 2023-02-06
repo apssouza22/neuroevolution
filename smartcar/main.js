@@ -28,7 +28,7 @@ function startGame() {
 trainGeneticAlgo();
 
 function updateFrameLoop(input) {
-    gameStepFrameCount = input.value == "" ? 1 : parseInt(input.value);
+    gameStepFrameCount = slider.value == "" ? 1 : parseInt(input.value);
 }
 
 function updatePopulation(input) {

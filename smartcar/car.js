@@ -1,6 +1,6 @@
 class Car extends PopulationItem{
     constructor(x, y, width, height, controlType, maxSpeed = 3, color = "blue") {
-        super();
+        super([5,6, 4, 4]);
         this.x = x;
         this.y = y;
         this.width = width;
@@ -19,7 +19,6 @@ class Car extends PopulationItem{
 
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this);
-            this.genetics = new Genetics([this.sensor.rayCount, 6, 4, 4]);
         }
         this.controls = new Controls(controlType);
 
