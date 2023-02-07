@@ -1,7 +1,7 @@
-# Self-driving-car with Genetic algorithm and Artificial Neural Networks
+# NeuroEvolution library
+GeneticEvolution is a library that allows you to easily use [NeuroEvolution](https://en.wikipedia.org/wiki/Neuroevolution) in your game.
 
-This is a self-driving car game developed using the combination of 
-Genetic algorithm and Artificial Neural Networks(NeuroEvolution). 
+In this project we have applied the GeneticEvolution to multiple games such as self-driving car, smartCaps and flappy bird.
 
 This project is a follow-up on my project about [Artificial Neural Networks from scratch](https://github.com/apssouza22/neuralnet-browser) where I show how to create an ANN
 from scratch without libraries. In that project the learning process is done using backpropagation(gradient descent), this project 
@@ -13,29 +13,34 @@ Evolution of the population then takes place after the repeated application of t
 
 The project is developed from scratch and with no external libraries.
 
-![Alt text](smartcar/nn.png?raw=true "Self driving car")
-
-## NeuroEvolution library
-We have made the NeuroEvolution framework totally independent of the game this way we can use it in any game we want.
-The framework is in the `neuroevolution` folder. The framework is composed of 3 main classes:
+## Get started
+The library is in the `neuroevolution` folder. The library is composed of 3 main classes:
 - `NeuralNetwork`: This class represents the required Artificial Neural network.
 - `GeneticEvolution`: This class represents the Genetic Evolution Algorithm.
 - `PopulationHandler`: This class represents the genetic population.
+- `PopulationItem`: This class represents the item in population.
 
 ```
 let population = [new PopulationItem(), new PopulationItem()]
 let populationHandler =  new PopulationHandler(population)
 let geneticEvolution = new GeneticEvolution(populationHandler);
-geneticEvolution.loadDna(); // load DNAs from local storage if available
 geneticEvolution.evolve(); // evolve the population based on the fitness function
-geneticEvolution.saveDna(); // save the DNAs to local storage
 ```
 
-`PopulationItem` and `PopulationHandler` are classes that you need to implement in your game. 
-See the [Car](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L1) and [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L176) for an example.
+`PopulationItem` and `PopulationHandler` are classes that you need to implement in your game.
+Population Item examples:
+- [Car](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L1)
+- [SmartCaps](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCaps.js#L1)
+- [FlappyBird](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/bird.js#L6)
+
+- PopulationHandler examples:
+- [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L176)
+- [SmartCapsPopulation](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCapsPop.js#L1)
+- [FlappyBirdPopulation](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/ga.js#L11)
 
 
-You can use the population genes to play the game. See the [Car.steer](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L71) for an example.
+You can use the population genes to perform the game action. 
+See the [Car.steer](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L71), [SmartCaps.makeMove](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCaps.js#L128) and [FlappyBird.think](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/bird.js#L31) methods.
 ```
 geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
     let output = item.useGenes(input);
@@ -43,12 +48,15 @@ geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
 });
 ```
 
+![Alt text](self-driving.png?raw=true "Self driving car")
+![Alt text](flappy.png?raw=true "Flappy bird")
+![Alt text](smartcaps.png?raw=true "SmartCaps")
 
 ### If this project helped you, consider leaving a star  and by me a coffee
 <a href="https://www.buymeacoffee.com/apssouza"><img src="https://miro.medium.com/max/654/1*rQv8JgstmK0juxP-Kb4IGg.jpeg"></a>
 
 ---
-This project apply the library to three different projects:
+To learn more about the game examples check the following links:
 - [Self-driving car](https://github.com/gniziemazity/Self-driving-car)
 - [SmartCaps](https://github.com/danielszabo88/smartCaps)
 - [Flappy bird](https://github.com/CodingTrain/website-archive/tree/main/Courses/natureofcode/11.3_neuroevolution_tfjs.js)
