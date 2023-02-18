@@ -3,7 +3,12 @@
 // http://thecodingtrain.com
 // https://youtu.be/cdUNkwXx-I4
 
+/**
+ * To enable manual play. Change TOTAL=2 and NEUROEVOLUTION_ENABLED=false
+ * @type {number}
+ */
 const TOTAL = 250;
+const NEUROEVOLUTION_ENABLED=true
 let birds = [];
 let savedBirds = [];
 let pipes = [];
@@ -11,13 +16,10 @@ let counter = 0;
 let slider;
 let genericEvolution;
 
-function keyPressed() {
-  if (key === 'S') {
-    let bird = birds[0];
-    saveJSON(bird.brain, 'bird.json');
-  }
-}
 
+/**
+ * Set up the sketch. This is called by the p5 framework
+ */
 function setup() {
   createCanvas(640, 480);
   slider = createSlider(1, 10, 1);
@@ -27,6 +29,9 @@ function setup() {
   genericEvolution = new GeneticEvolution(new BirdsPopulation(savedBirds));
 }
 
+/**
+ * Draw the game. It is called for each frame. This is called by the p5 framework
+ */
 function draw() {
   for (let n = 0; n < slider.value(); n++) {
     if (counter % 75 == 0) {
@@ -79,9 +84,11 @@ function draw() {
   }
 }
 
-// function keyPressed() {
-//   if (key == ' ') {
-//     bird.up();
-//     //console.log("SPACE");
-//   }
-// }
+function keyPressed() {
+  if (key == ' ') {
+    for (let bird of birds) {
+      bird.up();
+    }
+  }
+}
+

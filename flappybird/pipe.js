@@ -10,7 +10,7 @@ class Pipe {
     this.bottom = height - (this.top + this.spacing);
     this.x = width;
     this.w = 80;
-    this.speed = 6;
+    this.speed = 3;
   }
 
   hits(bird) {

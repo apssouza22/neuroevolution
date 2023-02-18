@@ -29,6 +29,9 @@ class Bird extends PopulationItem{
   }
 
   think(pipes) {
+    if (!NEUROEVOLUTION_ENABLED){
+      return
+    }
     let closestPipe = this.getClosestPipe(pipes);
     let inputs = this.prepareEnvInput(closestPipe);
 

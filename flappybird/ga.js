@@ -2,6 +2,9 @@
 // Neuro-Evolution Flappy Bird
 
 function nextGeneration() {
+  if (!NEUROEVOLUTION_ENABLED){
+    return
+  }
   console.log('next generation');
   genericEvolution.evolve()
   birds = [...genericEvolution.getPopulationHandler().population]
