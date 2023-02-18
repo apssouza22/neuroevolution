@@ -1,51 +1,73 @@
 // Class responsible for handling the car direction
 class Controls {
 
-    constructor(type) {
-        this.forward = false;
-        this.left = false;
-        this.right = false;
-        this.reverse = false;
+    /**
+     *
+     * @param {string}type
+     * @param {Genetics} genetics
+     */
+    constructor(type, genetics) {
+        this.direction = {
+            forward: false,
+            left: false,
+            right: false,
+            reverse: false,
+        }
+
+        this.genetics = genetics
+        this.controlType = type
         switch (type) {
             case "KEYS":
                 this.#addKeyboardListeners();
                 break;
             case "DUMMY":
-                this.forward = true;
+                this.direction.forward = true;
                 break;
         }
+    }
+
+    getDirection(input) {
+        if (this.controlType != "AI") {
+            return this.direction
+        }
+        let outputs = this.genetics.useGenes(input);
+        this.direction.forward = outputs[0];
+        this.direction.left = outputs[1];
+        this.direction.right = outputs[2];
+        this.direction.reverse = outputs[3];
+        return this.direction
     }
 
     #addKeyboardListeners() {
         document.onkeydown = (event) => {
             switch (event.key) {
                 case "ArrowLeft":
-                    this.left = true;
+                    this.direction.left = true;
                     break;
                 case "ArrowRight":
-                    this.right = true;
+                    this.direction.right = true;
                     break;
                 case "ArrowUp":
-                    this.forward = true;
+                    this.direction.forward = true;
                     break;
                 case "ArrowDown":
-                    this.reverse = true;
+                    this.direction.reverse = true;
                     break;
             }
         }
         document.onkeyup = (event) => {
             switch (event.key) {
                 case "ArrowLeft":
-                    this.left = false;
+                    this.direction.left = false;
                     break;
                 case "ArrowRight":
-                    this.right = false;
+                    this.direction.right = false;
                     break;
                 case "ArrowUp":
-                    this.forward = false;
+                    this.direction.forward = false;
                     break;
                 case "ArrowDown":
-                    this.reverse = false;
+                    this.direction.reverse = false;
                     break;
             }
         }

@@ -29,18 +29,18 @@ geneticEvolution.evolve(); // evolve the population based on the fitness functio
 
 `PopulationItem` and `PopulationHandler` are classes that you need to implement in your game.
 Population Item examples:
-- [Car](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L1)
+- [Car](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/car.js#L1)
 - [SmartCaps](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCaps.js#L1)
 - [FlappyBird](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/bird.js#L6)
 
 - PopulationHandler examples:
-- [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L176)
+- [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/car.js#L176)
 - [SmartCapsPopulation](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCapsPop.js#L1)
 - [FlappyBirdPopulation](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/ga.js#L11)
 
 
 You can use the population genes to perform the game action. 
-See the [Car.steer](https://github.com/apssouza22/neuroevolution/blob/master/car.js#L71), [SmartCaps.makeMove](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCaps.js#L128) and [FlappyBird.think](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/bird.js#L31) methods.
+See the [Car.steer](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/car.js#L71), [SmartCaps.makeMove](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCaps.js#L128) and [FlappyBird.think](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/bird.js#L31) methods.
 ```
 geneticEvolution.getPopulationHandler().getPopulation().forEach((item) => {
     let output = item.useGenes(input);
