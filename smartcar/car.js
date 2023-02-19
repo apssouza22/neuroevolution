@@ -20,7 +20,7 @@ class Car extends PopulationItem{
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this);
         }
-        this.controls = new Controls(controlType, this.genetics);
+        this.controls = new Controls(controlType, this.genome);
 
         this.img = new Image();
         this.img.src = "car.png"

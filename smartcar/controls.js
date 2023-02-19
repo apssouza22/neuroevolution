@@ -4,9 +4,9 @@ class Controls {
     /**
      *
      * @param {string}type
-     * @param {Genetics} genetics
+     * @param {Genome} genome
      */
-    constructor(type, genetics) {
+    constructor(type, genome) {
         this.direction = {
             forward: false,
             left: false,
@@ -14,7 +14,7 @@ class Controls {
             reverse: false,
         }
 
-        this.genetics = genetics
+        this.genome = genome
         this.controlType = type
         switch (type) {
             case "KEYS":
@@ -30,7 +30,7 @@ class Controls {
         if (this.controlType != "AI") {
             return this.direction
         }
-        let outputs = this.genetics.useGenes(input);
+        let outputs = this.genome.useGenes(input);
         this.direction.forward = outputs[0];
         this.direction.left = outputs[1];
         this.direction.right = outputs[2];

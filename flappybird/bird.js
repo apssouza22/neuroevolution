@@ -35,7 +35,7 @@ class Bird extends PopulationItem{
     let closestPipe = this.getClosestPipe(pipes);
     let inputs = this.prepareEnvInput(closestPipe);
 
-    let output =this.genetics.useGenes(inputs)
+    let output =this.genome.useGenes(inputs)
 
     if (output[0] > output[1]) {
       this.up();

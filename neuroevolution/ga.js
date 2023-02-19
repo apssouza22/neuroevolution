@@ -58,11 +58,11 @@ class GeneticEvolution {
             if (p === mom || p === dad) {
                 continue;
             }
-            let momDna = mom.genetics;
-            let dadDna = dad.genetics;
+            let momDna = mom.genome;
+            let dadDna = dad.genome;
             let childDna = momDna.crossover(dadDna);
             childDna.mutate(this.mutationRate);
-            p.genetics = childDna
+            p.genome = childDna
             children.push(p);
         }
         return children;
@@ -76,8 +76,8 @@ class GeneticEvolution {
             console.log("Loading Genetics from local storage");
 
             const [mom, dad] = this.select();
-            mom.genetics.loadGenetics(JSON.parse(localStorage.getItem("momBrain")));
-            dad.genetics.loadGenetics(JSON.parse(localStorage.getItem("dadBrain")));
+            mom.genome.loadGenetics(JSON.parse(localStorage.getItem("momBrain")));
+            dad.genome.loadGenetics(JSON.parse(localStorage.getItem("dadBrain")));
         }
     }
 
@@ -86,8 +86,8 @@ class GeneticEvolution {
      */
     saveGenetics() {
         const [mom, dad] = this.select();
-        mom.genetics.saveGenetics("momBrain");
-        dad.genetics.saveGenetics("dadBrain");
+        mom.genome.saveGenetics("momBrain");
+        dad.genome.saveGenetics("dadBrain");
     }
 }
 
@@ -147,9 +147,9 @@ class PopulationHandler {
  */
 class PopulationItem {
     /**
-     * @type {Genetics}
+     * @type {Genome}
      */
-    genetics;
+    genome;
     /**
      * @type {number}
      */
@@ -159,7 +159,7 @@ class PopulationItem {
      * @param [] layer_nodes_counts
      */
     constructor(layer_nodes_counts) {
-        this.genetics = new Genetics(layer_nodes_counts)
+        this.genome = new Genome(layer_nodes_counts)
     }
 
     /**
@@ -176,7 +176,7 @@ class PopulationItem {
 /**
  * Class responsible for handle the Genetics of the population
  */
-class Genetics {
+class Genome {
 
     /**
      * @param [] layer_nodes_counts
@@ -237,11 +237,11 @@ class Genetics {
 
     /**
      * Mutate by crossing two neural networks
-     * @param {Genetics} genetics - crossover partner
+     * @param {Genome} genetics - crossover partner
      */
     crossover(genetics) {
         this.#crossoverValidator(genetics);
-        const offspring = new Genetics(genetics.nn.layerNodesCounts);
+        const offspring = new Genome(genetics.nn.layerNodesCounts);
         for (let i = 0; i < genetics.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
                 offspring.nn.layers[i].weights = Matrix.copy(genetics.nn.layers[i].weights);
@@ -261,11 +261,11 @@ class Genetics {
 
     /**
      * Validate the genetics to be used in crossover
-     * @param {Genetics} genetics
+     * @param {Genome} genetics
      * @returns {boolean}
      */
     #crossoverValidator(genetics) {
-        if (this instanceof Genetics) {
+        if (this instanceof Genome) {
             if (genetics.nn.layers.length == this.nn.layers.length) {
                 for (let i = 0; i < genetics.nn.layers.length; i++) {
                     if (genetics.nn.layers[i].outputs.rows != this.nn.layers[i].outputs.rows) {

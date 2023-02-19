@@ -130,7 +130,7 @@ class SmartCaps extends PopulationItem{
         this.right = false;
         this.up = false;
         this.down = false;
-        let output = this.genetics.useGenes(sensorData)
+        let output = this.genome.useGenes(sensorData)
 
         if(output[0] === 1){
             this.left = true

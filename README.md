@@ -3,6 +3,8 @@ GeneticEvolution is a library that allows you to easily use [NeuroEvolution](htt
 
 In this project we have applied the GeneticEvolution to multiple games such as self-driving car, smartCaps and flappy bird.
 
+![Alt text](neuroevolution.png?raw=true "Neuro-evolution")
+
 This project is a follow-up on my project about [Artificial Neural Networks from scratch](https://github.com/apssouza22/neuralnet-browser) where I show how to create an ANN
 from scratch without libraries. In that project the learning process is done using backpropagation(gradient descent), this project 
 use a different approach, we will use Evolutionary Algorithm.
