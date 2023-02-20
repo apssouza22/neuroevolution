@@ -1,6 +1,7 @@
-class SmartCaps extends PopulationItem{
-    constructor(x1, y1, x2, y2, r, m){
-        super([5,6, 4, 4])
+class SmartCaps extends PopulationItem {
+    constructor(x1, y1, x2, y2, r, m) {
+        super([5, 6, 4, 4])
+        this.bestCap = false;
         this.comp = [];
         this.pos = new Vector(this.x, this.y);
         this.m = 0;
@@ -31,16 +32,16 @@ class SmartCaps extends PopulationItem{
         this.comp = [new Circle(x1, y1, r), new Circle(x2, y2, r)];
         let recV1 = this.comp[1].pos.add(this.comp[1].pos.subtr(this.comp[0].pos).unit().normal().mult(r));
         let recV2 = this.comp[0].pos.add(this.comp[1].pos.subtr(this.comp[0].pos).unit().normal().mult(r));
-        this.comp.unshift(new Rectangle(recV1.x, recV1.y, recV2.x, recV2.y, 2*r));
+        this.comp.unshift(new Rectangle(recV1.x, recV1.y, recV2.x, recV2.y, 2 * r));
         this.pos = this.comp[0].pos;
         this.m = m;
-        if (this.m === 0){
+        if (this.m === 0) {
             this.inv_m = 0;
         } else {
             this.inv_m = 1 / this.m;
         }
-        this.inertia = this.m * ((2*this.comp[0].width)**2 +(this.comp[0].length+2*this.comp[0].width)**2) / 12;
-        if (this.m === 0){
+        this.inertia = this.m * ((2 * this.comp[0].width) ** 2 + (this.comp[0].length + 2 * this.comp[0].width) ** 2) / 12;
+        if (this.m === 0) {
             this.inv_inertia = 0;
         } else {
             this.inv_inertia = 1 / this.inertia;
@@ -55,10 +56,10 @@ class SmartCaps extends PopulationItem{
         this.fitness = 0
         this.reward = 0
         this.sensors = {
-            start: new Vector(0,0),
+            start: new Vector(0, 0),
             dist: 200,
             dir: [],
-            line: new Line(0,0,0,0)
+            line: new Line(0, 0, 0, 0)
         }
         this.sensors.line.color = "grey"
         this.sensorValues = []
@@ -74,8 +75,9 @@ class SmartCaps extends PopulationItem{
             comp.color = color
         })
     }
-    remove(){
-        if (BODIES.indexOf(this) !== -1){
+
+    remove() {
+        if (BODIES.indexOf(this) !== -1) {
             BODIES.splice(BODIES.indexOf(this), 1);
         }
     }
@@ -180,9 +182,11 @@ class SmartCaps extends PopulationItem{
                 }
             })
             this.sensorValues[i] = closestPoint.subtr(this.sensors.start).mag()
-            testCircle(closestPoint.x, closestPoint.y, "green")
             this.sensors.line.vertex[1] = closestPoint
-            this.sensors.line.draw()
+            if (this.bestCap){
+                testCircle(closestPoint.x, closestPoint.y, "green")
+                this.sensors.line.draw()
+            }
             this.sensors.line.color = "grey"
         }
         return this.sensorValues

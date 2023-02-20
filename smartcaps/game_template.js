@@ -73,6 +73,7 @@ let geneticEvolution = new GeneticEvolution(smartCapsPop);
 function gameLogic(){
     if(capsAreMoving){
         if(counter % 3 === 0){
+            smartCapsPop.setBestCap()
             smartCapsPop.caps.forEach(caps => {
                 if(stepCounter < 300){
                     caps.makeMove(caps.getSensorData(raceWalls))

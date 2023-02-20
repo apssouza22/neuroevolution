@@ -1,5 +1,5 @@
-class SmartCapsPop extends PopulationHandler{
-    constructor(popSize){
+class SmartCapsPop extends PopulationHandler {
+    constructor(popSize) {
         super([])
         this.caps = []
         this.popSize = popSize
@@ -11,18 +11,18 @@ class SmartCapsPop extends PopulationHandler{
     }
 
     // creating a population with the size of the popSize property
-    init(){
-        for(let i=0; i<this.popSize; i++){
-            if(this.caps[i]){
+    init() {
+        for (let i = 0; i < this.popSize; i++) {
+            if (this.caps[i]) {
                 this.caps[i].remove()
             }
-            this.caps[i] = new SmartCaps(this.startingPoint.x, this.startingPoint.y+10, this.startingPoint.x, this.startingPoint.y-10, 10, 5)
+            this.caps[i] = new SmartCaps(this.startingPoint.x, this.startingPoint.y + 10, this.startingPoint.x, this.startingPoint.y - 10, 10, 5)
         }
         this.addPopulation(this.caps)
     }
 
     // the sum of the populations members velocities
-    velocitySum(){
+    velocitySum() {
         let vSum = 0
         this.caps.forEach(caps => {
             vSum += caps.vel.mag()
@@ -40,14 +40,14 @@ class SmartCapsPop extends PopulationHandler{
     }
 
     // gives a fitness value to each members of the population
-    calculateFitness(){
+    calculateFitness() {
         this.caps.forEach(caps => {
-            caps.fitness = caps.reward**4
+            caps.fitness = caps.reward ** 4
         })
     }
 
     // the sum of the members fitness values
-    fitnessSum(){
+    fitnessSum() {
         let fSum = 0
         this.caps.forEach(caps => {
             fSum += caps.calcFitness()
@@ -56,8 +56,8 @@ class SmartCapsPop extends PopulationHandler{
     }
 
     // population members are set to original position
-    replaceNextGen(){
-        for(let i=0; i < this.popSize; i++){
+    replaceNextGen() {
+        for (let i = 0; i < this.popSize; i++) {
             this.caps[i].brain = this.nextGenBrains[i]
             this.caps[i].setPosition(this.startingPoint.x, this.startingPoint.y, 0)
             this.caps[i].setColor("lightgreen")
@@ -68,8 +68,16 @@ class SmartCapsPop extends PopulationHandler{
         this.generation++
     }
 
-    reset(){
+    reset() {
         super.reset()
         this.replaceNextGen()
+    }
+
+    setBestCap() {
+        this.caps.forEach(cap => {
+            cap.isBestCap = false
+        })
+        const sorted = this.sortByFitness()
+        sorted[0].isBestCap = true
     }
 }

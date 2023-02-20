@@ -1,5 +1,5 @@
-# NeuroEvolution library
-GeneticEvolution is a library that allows you to easily use [NeuroEvolution](https://en.wikipedia.org/wiki/Neuroevolution) in your game.
+# NeuroEvolution made easy
+This project contain a neuro-evolution library that allows you to easily use [NeuroEvolution](https://en.wikipedia.org/wiki/Neuroevolution) in your game.
 
 In this project we have applied the GeneticEvolution to multiple games such as self-driving car, smartCaps and flappy bird.
 
