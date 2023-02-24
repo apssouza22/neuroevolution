@@ -1,11 +1,13 @@
 # NeuroEvolution made easy
+Neuroevolution is a powerful approach to machine learning and artificial intelligence that uses evolutionary algorithms to evolve neural networks.
+
 This project contain a neuro-evolution library that allows you to easily use [NeuroEvolution](https://en.wikipedia.org/wiki/Neuroevolution) in your game.
 
-In this project we have applied the GeneticEvolution to multiple games such as self-driving car, smartCaps and flappy bird.
+In this project, we have applied GeneticEvolution to multiple games such as self-driving cars, smart caps and flappy bird.
 
 ![Alt text](neuroevolution.png?raw=true "Neuro-evolution")
 
-This project is a follow-up on my project about [Artificial Neural Networks from scratch](https://github.com/apssouza22/neuralnet-browser) where I show how to create an ANN
+This project is a follow-up to my project about [Artificial Neural Networks from scratch](https://github.com/apssouza22/neuralnet-browser), where I show how to create an ANN
 from scratch without libraries. In that project the learning process is done using backpropagation(gradient descent), this project 
 use a different approach, we will use Evolutionary Algorithm.
 

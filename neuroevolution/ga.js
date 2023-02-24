@@ -237,20 +237,20 @@ class Genome {
 
     /**
      * Mutate by crossing two neural networks
-     * @param {Genome} genetics - crossover partner
+     * @param {Genome} dad - crossover partner
      */
-    crossover(genetics) {
-        this.#crossoverValidator(genetics);
-        const offspring = new Genome(genetics.nn.layerNodesCounts);
-        for (let i = 0; i < genetics.nn.layers.length; i++) {
+    crossover(dad) {
+        this.#crossoverValidator(dad);
+        const offspring = new Genome(dad.nn.layerNodesCounts);
+        for (let i = 0; i < dad.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].weights = Matrix.copy(genetics.nn.layers[i].weights);
+                offspring.nn.layers[i].weights = Matrix.copy(dad.nn.layers[i].weights);
             } else {
                 offspring.nn.layers[i].weights = Matrix.copy(this.nn.layers[i].weights);
             }
 
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].biases = Matrix.copy(genetics.nn.layers[i].biases);
+                offspring.nn.layers[i].biases = Matrix.copy(dad.nn.layers[i].biases);
             } else {
                 offspring.nn.layers[i].biases = Matrix.copy(this.nn.layers[i].biases);
             }

@@ -1,7 +1,7 @@
 class SmartCaps extends PopulationItem {
     constructor(x1, y1, x2, y2, r, m) {
         super([5, 6, 4, 4])
-        this.bestCap = false;
+        this.isBestCap = false;
         this.comp = [];
         this.pos = new Vector(this.x, this.y);
         this.m = 0;
@@ -183,7 +183,7 @@ class SmartCaps extends PopulationItem {
             })
             this.sensorValues[i] = closestPoint.subtr(this.sensors.start).mag()
             this.sensors.line.vertex[1] = closestPoint
-            if (this.bestCap){
+            if (this.isBestCap){
                 testCircle(closestPoint.x, closestPoint.y, "green")
                 this.sensors.line.draw()
             }
