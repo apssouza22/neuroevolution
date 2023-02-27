@@ -240,18 +240,18 @@ class Genome {
      * Mutate by crossing two neural networks
      * @param {Genome} dad - crossover partner
      */
-    crossover(genetics) {
-        this.#crossoverValidator(genetics);
-        const offspring = new Genome(genetics.nn.layerNodesCounts);
-        for (let i = 0; i < genetics.nn.layers.length; i++) {
+    crossover(dad) {
+        this.#crossoverValidator(dad);
+        const offspring = new Genome(dad.nn.layerNodesCounts);
+        for (let i = 0; i < dad.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].weights = Matrix.copy(genetics.nn.layers[i].weights);
+                offspring.nn.layers[i].weights = Matrix.copy(dad.nn.layers[i].weights);
             } else {
                 offspring.nn.layers[i].weights = Matrix.copy(this.nn.layers[i].weights);
             }
 
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].biases = Matrix.copy(genetics.nn.layers[i].biases);
+                offspring.nn.layers[i].biases = Matrix.copy(dad.nn.layers[i].biases);
             } else {
                 offspring.nn.layers[i].biases = Matrix.copy(this.nn.layers[i].biases);
             }
@@ -261,15 +261,15 @@ class Genome {
 
 
     /**
-     * Validate the genetics to be used in crossover
-     * @param {Genome} genetics
+     * Validate the genome to be used in crossover
+     * @param {Genome} genome
      * @returns {boolean}
      */
-    #crossoverValidator(genetics) {
+    #crossoverValidator(genome) {
         if (this instanceof Genome) {
-            if (genetics.nn.layers.length == this.nn.layers.length) {
-                for (let i = 0; i < genetics.nn.layers.length; i++) {
-                    if (genetics.nn.layers[i].outputs.rows != this.nn.layers[i].outputs.rows) {
+            if (genome.nn.layers.length == this.nn.layers.length) {
+                for (let i = 0; i < genome.nn.layers.length; i++) {
+                    if (genome.nn.layers[i].outputs.rows != this.nn.layers[i].outputs.rows) {
                         throw new Error("Crossover networks must have the same layer nodes counts");
                     }
                 }
