@@ -200,6 +200,7 @@ class CarPopulation extends PopulationHandler {
     }
 
     generateCars(x) {
+        let controlType = DRIVE_AI_MODE_ENABLED ? "AI":"KEYS";
         for (let i = 0; i < this.count; i++) {
             this.population[i] = new Car(x, 100, 30, 50, "AI");
         }
