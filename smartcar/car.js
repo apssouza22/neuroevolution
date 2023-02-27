@@ -20,7 +20,7 @@ class Car extends PopulationItem{
         if (controlType != "DUMMY") {
             this.sensor = new Sensor(this);
         }
-        this.controls = new Controls(controlType, this.genome);
+        this.controls = new Controls(controlType);
 
         this.img = new Image();
         this.img.src = "car.png"
@@ -46,9 +46,6 @@ class Car extends PopulationItem{
             this.distanceTravelled = distance;
         }
         this.totalCarsOverTaken = this.damaged ? this.totalCarsOverTaken : traffic.filter(t => t.y > this.y).length
-        if (this.sensor) {
-            this.sensor.update(roadBorders, traffic);
-        }
         if (!this.damaged) {
             this.#move();
             this.polygon = createPolygon({
@@ -61,6 +58,10 @@ class Car extends PopulationItem{
             );
             this.damaged = isCollision(this.polygon, roadBorders, traffic);
         }
+        if (this.sensor) {
+            this.sensor.update(roadBorders, traffic);
+            this.steer();
+        }
     }
 
     /**
@@ -68,12 +69,17 @@ class Car extends PopulationItem{
      */
     steer() {
         if (!this.useBrain) {
-            return this.controls.getDirection({})
+            return
         }
         const offsets = this.sensor.readings.map(
                 s => s == null ? 0 : 1 - s.offset
         );
-        return this.controls.getDirection(offsets)
+        let outputs = this.genome.useGenes(offsets);
+
+        this.controls.forward = outputs[0];
+        this.controls.left = outputs[1];
+        this.controls.right = outputs[2];
+        this.controls.reverse = outputs[3];
     }
 
 
@@ -95,13 +101,12 @@ class Car extends PopulationItem{
     }
 
     getFutureCoordinates() {
-        let direction = this.steer()
         let speed = this.speed
         let angle = this.angle
-        if (direction.forward) {
+        if (this.controls.forward) {
             speed += this.acceleration;
         }
-        if (direction.reverse) {
+        if (this.controls.reverse) {
             speed -= this.acceleration;
         }
 
@@ -124,10 +129,10 @@ class Car extends PopulationItem{
 
         if (speed != 0) {
             const flip = speed > 0 ? 1 : -1;
-            if (direction.left) {
+            if (this.controls.left) {
                 angle += 0.03 * flip;
             }
-            if (direction.right) {
+            if (this.controls.right) {
                 angle -= 0.03 * flip;
             }
         }
@@ -195,9 +200,8 @@ class CarPopulation extends PopulationHandler {
     }
 
     generateCars(x) {
-        let controlType = DRIVE_AI_MODE_ENABLED ? "AI":"KEYS";
         for (let i = 0; i < this.count; i++) {
-            this.population[i] = new Car(x, 100, 30, 50, controlType);
+            this.population[i] = new Car(x, 100, 30, 50, "AI");
         }
     }
 

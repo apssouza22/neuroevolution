@@ -73,7 +73,7 @@ class GeneticEvolution {
      */
     loadGenetics() {
         if (localStorage.getItem("momBrain") && localStorage.getItem("dadBrain")) {
-            console.log("Loading Genetics from local storage");
+            console.log("Loading Genome from local storage");
 
             const [mom, dad] = this.select();
             mom.genome.loadGenetics(JSON.parse(localStorage.getItem("momBrain")));
@@ -82,7 +82,7 @@ class GeneticEvolution {
     }
 
     /**
-     * Save the best Genetics to the local storage
+     * Save the best Genome to the local storage
      */
     saveGenetics() {
         const [mom, dad] = this.select();
@@ -168,13 +168,14 @@ class PopulationItem {
      * @returns {number}
      */
     calcFitness() {
+        // TODO remove this implementation
         return this.fitness
     }
 }
 
 
 /**
- * Class responsible for handle the Genetics of the population
+ * Class responsible for handle the Genome of the population
  */
 class Genome {
 
@@ -196,7 +197,7 @@ class Genome {
     }
 
     /**
-     * Load the pre-trained weights(Genetics) from a JSON object
+     * Load the pre-trained weights(Genome) from a JSON object
      * @param {NeuralNetwork} dict
      * @returns {NeuralNetwork}
      */
@@ -205,7 +206,7 @@ class Genome {
     }
 
     /**
-     * Save Genetics to local storage
+     * Save Genome to local storage
      * @param {String} key - the local storage key to save the model weights to
      */
     saveGenetics(key = "brain") {
@@ -239,18 +240,18 @@ class Genome {
      * Mutate by crossing two neural networks
      * @param {Genome} dad - crossover partner
      */
-    crossover(dad) {
-        this.#crossoverValidator(dad);
-        const offspring = new Genome(dad.nn.layerNodesCounts);
-        for (let i = 0; i < dad.nn.layers.length; i++) {
+    crossover(genetics) {
+        this.#crossoverValidator(genetics);
+        const offspring = new Genome(genetics.nn.layerNodesCounts);
+        for (let i = 0; i < genetics.nn.layers.length; i++) {
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].weights = Matrix.copy(dad.nn.layers[i].weights);
+                offspring.nn.layers[i].weights = Matrix.copy(genetics.nn.layers[i].weights);
             } else {
                 offspring.nn.layers[i].weights = Matrix.copy(this.nn.layers[i].weights);
             }
 
             if (Math.random() < 0.5) {
-                offspring.nn.layers[i].biases = Matrix.copy(dad.nn.layers[i].biases);
+                offspring.nn.layers[i].biases = Matrix.copy(genetics.nn.layers[i].biases);
             } else {
                 offspring.nn.layers[i].biases = Matrix.copy(this.nn.layers[i].biases);
             }
@@ -276,7 +277,7 @@ class Genome {
             }
             throw new Error("Crossover networks must have the same layer counts");
         }
-        throw new Error("Crossover networks must be of type Genetics");
+        throw new Error("Crossover networks must be of type Genome");
     }
 }
 
