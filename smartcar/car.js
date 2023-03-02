@@ -40,6 +40,14 @@ class Car extends PopulationItem{
         }
     }
 
+    /**
+     * @override {PopulationItem.calcFitness}
+     * Calculates how good the car performed on the road
+     */
+    calcFitness() {
+        return this.totalCarsOverTaken
+    }
+
     update(roadBorders, traffic) {
         const distance = this.y * -1;
         if (this.distanceTravelled < distance) {
@@ -83,13 +91,6 @@ class Car extends PopulationItem{
     }
 
 
-    /**
-     * @override {PopulationItem.calcFitness}
-     * Calculates how good the car performed on the road
-     */
-    calcFitness() {
-        return this.totalCarsOverTaken
-    }
 
 
     #move() {
@@ -182,13 +183,27 @@ class CarPopulation extends PopulationHandler {
     }
 
     /**
-     * Add game road
-     * @param {Road}road
+     * @override {PopulationHandler.calculateFitness}
+     * Calculate the fitness of all items in the population
      */
-    addRoad(road) {
-        this.road = road;
+    calculateFitness() {
+        for (const p of this.population) {
+            p.calcFitness();
+        }
     }
 
+    /**
+     * @override {PopulationHandler.sortByFitness}
+     * Sort population by fitness
+     */
+    sortByFitness() {
+        return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
+    }
+
+    /**
+     * @override {PopulationHandler.reset}
+     * Reset population
+     */
     reset() {
         for (const pop of this.population) {
             pop.fitness = 0;
@@ -199,16 +214,21 @@ class CarPopulation extends PopulationHandler {
         console.log("Resetting population");
     }
 
+    /**
+     * Add game road
+     * @param {Road}road
+     */
+    addRoad(road) {
+        this.road = road;
+    }
+
     generateCars(x) {
         let controlType = DRIVE_AI_MODE_ENABLED ? "AI":"KEYS";
         for (let i = 0; i < this.count; i++) {
-            this.population[i] = new Car(x, 100, 30, 50, "AI");
+            this.population[i] = new Car(x, 100, 30, 50, controlType);
         }
     }
 
-    sortByFitness() {
-        return this.population.sort((a, b) => a.calcFitness() > b.calcFitness() ? -1 : 1)
-    }
 
     /**
      * Get the population

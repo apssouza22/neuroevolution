@@ -25,20 +25,25 @@ The library is in the `neuroevolution` folder. The library is composed of 3 main
 - `PopulationItem`: This class represents the item in population.
 
 ```
+## Inititalize the genetic evolution
 let population = [new PopulationItem(), new PopulationItem()]
 let populationHandler =  new PopulationHandler(population)
 let geneticEvolution = new GeneticEvolution(populationHandler);
+
+## Evolve the population after each generation
 geneticEvolution.evolve(); // evolve the population based on the fitness function
+
+
 ```
 
 `PopulationItem` and `PopulationHandler` are classes that you need to implement in your game.
 Population Item examples:
-- [Car](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/car.js#L1)
+- [Car](https://github.com/apssouza22/neuroevolution/blob/master/smartcar/car.js#L1)
 - [SmartCaps](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCaps.js#L1)
 - [FlappyBird](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/bird.js#L6)
 
 - PopulationHandler examples:
-- [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/car.js#L176)
+- [CarPopulation](https://github.com/apssouza22/neuroevolution/blob/master/smartcar/car.js#L176)
 - [SmartCapsPopulation](https://github.com/apssouza22/neuroevolution/blob/master/smartcaps/SmartCapsPop.js#L1)
 - [FlappyBirdPopulation](https://github.com/apssouza22/neuroevolution/blob/master/flappybird/ga.js#L11)
 

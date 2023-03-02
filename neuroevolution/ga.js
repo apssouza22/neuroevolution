@@ -168,7 +168,6 @@ class PopulationItem {
      * @returns {number}
      */
     calcFitness() {
-        // TODO remove this implementation
         return this.fitness
     }
 }
